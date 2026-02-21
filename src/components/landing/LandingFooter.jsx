@@ -5,7 +5,7 @@ function LandingFooter() {
     <footer>
       <div className="footer-left">
         <a href={ROUTES.HOME} className="logo">
-          UNDER<span>DOG</span>
+          DARK<span>HORSE</span>
         </a>
         <p className="footer-desc">
           World Cup upset intelligence powered by machine learning

@@ -17,7 +17,7 @@ function HeroSection() {
           Predicting the Next World Cup <span className="accent">Upset.</span>
         </h1>
         <p className="hero-sub">
-          AI-powered match predictions that quantify underdog probability using
+          AI-powered match predictions that quantify dark horse probability using
           Elo modeling, form metrics, and machine learning.
         </p>
         <div className="hero-actions">

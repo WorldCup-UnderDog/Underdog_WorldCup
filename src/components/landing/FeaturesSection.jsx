@@ -6,7 +6,7 @@ function FeaturesSection() {
         Built for the <span style={{ color: 'var(--accent)' }}>Beautiful Game</span>
       </h2>
       <p className="section-sub">
-        Three analytical modules that surface where underdogs can outperform
+        Three analytical modules that surface where dark horses can outperform
         expectations.
       </p>
 

@@ -4,7 +4,7 @@ function LandingNav() {
   return (
     <nav>
       <a href={ROUTES.HOME} className="logo">
-        UNDER<span>DOG</span>
+        DARK<span>HORSE</span>
       </a>
       <ul>
         <li>
