@@ -81,8 +81,13 @@ function LoggedInPage() {
               </p>
             </article>
             <article className="dashboard-panel">
-              <h3>My Picks</h3>
-              <p>Placeholder for user picks and saved upsets.</p>
+              <h3>Team Roster Overview</h3>
+              <p>Browse all world cup teams in a static roster list.</p>
+              <p style={{ marginTop: '0.7rem' }}>
+                <a className="template-link" href={ROUTES.ROSTERS}>
+                  Open Team Roster
+                </a>
+              </p>
             </article>
             <article className="dashboard-panel">
               <h3>Profile</h3>

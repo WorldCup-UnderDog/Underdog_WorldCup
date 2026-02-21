@@ -128,6 +128,12 @@
   justify-content: space-between;
 }
 
+.topbar-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
 .dashboard-main {
   align-items: start;
   padding-top: 3rem;
@@ -159,6 +165,64 @@
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.roster-card {
+  width: min(1100px, 100%);
+}
+
+.roster-controls {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.roster-search {
+  max-width: 340px;
+}
+
+.roster-meta {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+.roster-tile {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.roster-flag {
+  width: 26px;
+  height: 18px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  flex-shrink: 0;
+}
+
+.roster-flag-fallback {
+  font-size: 1.25rem;
+  line-height: 1;
+  width: 26px;
+  display: inline-flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.roster-name {
+  font-size: 0.93rem;
+  color: var(--text);
 }
 
 @media (max-width: 600px) {

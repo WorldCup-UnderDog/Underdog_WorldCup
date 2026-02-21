@@ -4,4 +4,5 @@ export const ROUTES = {
   SIGNUP: '/signup',
   APP: '/app',
   MATCHUP: '/app/matchup',
+  ROSTERS: '/app/rosters',
 }
