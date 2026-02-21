@@ -528,6 +528,77 @@ h2 {
   margin-bottom: 4rem;
 }
 
+.auth-section {
+  border-top: 1px solid var(--glass-border);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.auth-card {
+  background: rgba(10, 22, 40, 0.7);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.auth-card h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.auth-card form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.auth-card label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.auth-card input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.7rem 0.8rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.auth-card input::placeholder {
+  color: rgba(122, 139, 160, 0.8);
+}
+
+.auth-card input:focus {
+  outline: 1px solid rgba(232, 200, 74, 0.5);
+}
+
+.auth-btn {
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.auth-btn-primary {
+  background: var(--accent);
+  color: #040810;
+}
+
+.auth-btn-secondary {
+  background: var(--glass);
+  color: var(--text);
+  border: 1px solid var(--glass-border);
+}
+
+
 .features-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -981,6 +1052,10 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stats-bar {
     padding: 1.5rem 2rem;
     flex-wrap: wrap;
@@ -1026,4 +1101,5 @@ footer {
   .btn-secondary {
     text-align: center;
   }
+
 }
