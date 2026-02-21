@@ -1,43 +1,75 @@
-# React + Vite
+# Underdog World Cup
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Underdog World Cup is a React + FastAPI app for matchup probability predictions.
 
-Currently, two official plugins are available:
+Frontend:
+- React (Vite) UI
+- Supabase auth
+- Matchup tool at `/app/matchup`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Backend:
+- FastAPI API
+- CSV-backed matchup probability lookup
+- Team support endpoint used by the frontend dropdowns
 
-## React Compiler
+## Repo Layout
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/` frontend app
+- `backend/app/` FastAPI app
+- `backend/app/services/` model lookup and prediction logic
+- `backend/data/` model CSV files used at runtime
 
-## Expanding the ESLint configuration
+## Local Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
-## Matchup Predictor (FastAPI + React)
-
-### Frontend
+### 1. Frontend
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Backend
+### 2. Backend
 
 ```bash
 cd backend
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### Env vars
+## Environment Variables
 
-Copy `.env.example` to `.env` and set:
+Create `.env` in the repo root:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- `VITE_API_BASE_URL` (defaults to `http://localhost:8000` if omitted)
+- `VITE_API_BASE_URL` (optional, defaults to `http://localhost:8000`)
+
+Backend optional vars are documented in `backend/.env.example`:
+- `MATCHUP_CSV_PATH`
+- `CORS_ALLOW_ORIGINS`
+- `CORS_ALLOW_ORIGIN_REGEX`
+
+## API Endpoints
+
+- `GET /health`
+  - Returns service status and loaded matchup metadata.
+- `GET /teams`
+  - Returns model-supported team names for the frontend selector.
+- `POST /predict-matchup`
+  - Request body:
+
+```json
+{
+  "team_a": "Germany",
+  "team_b": "Morocco",
+  "neutral_site": true
+}
+```
+
+## Notes
+
+- The matchup UI fetches team options from `/teams` on load.
+- If `/teams` fails, the UI falls back to a default local team list and shows an error banner.
+- Run both frontend and backend during local development.
