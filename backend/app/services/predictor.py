@@ -90,7 +90,8 @@ class MatchupPredictor:
         else:
             confidence = "low"
 
-        upset_score = round(max(0.0, min(10.0, 10.0 - (gap * 20))), 1)
+        # Upset score on 0-100 scale: closer matchups imply higher upset potential.
+        upset_score = round(max(0.0, min(100.0, 100.0 - (gap * 200))), 1)
         explanation = [
             f"Historical model matchup rates favor {predicted_winner}.",
             f"Win probability split: {team_a} {win_a}% / Draw {draw}% / {team_b} {win_b}%.",

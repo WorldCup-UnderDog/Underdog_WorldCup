@@ -1,7 +1,7 @@
 function UpsetMeter({ score }) {
-  const pct = Math.min((score / 10) * 100, 100)
-  const color = score >= 7 ? '#e8c84a' : score >= 4 ? '#f0a500' : '#4a8fff'
-  const label = score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW'
+  const pct = Math.min(Math.max(score, 0), 100)
+  const color = score >= 70 ? '#e8c84a' : score >= 40 ? '#f0a500' : '#4a8fff'
+  const label = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
 
   return (
     <div>
@@ -9,7 +9,7 @@ function UpsetMeter({ score }) {
         <span className="ms-upset-label">UPSET SCORE</span>
         <span className="ms-upset-value-wrap">
           <span className="ms-upset-value" style={{ color }}>{score}</span>
-          <span className="ms-upset-denom">/10</span>
+          <span className="ms-upset-denom">/100</span>
         </span>
       </div>
       <div className="ms-upset-track">

@@ -30,9 +30,9 @@ const FLAG_MAP = {
 const getFlag = (team) => FLAG_MAP[team] || '🏳️'
 
 function UpsetMeter({ score }) {
-  const pct = Math.min((score / 10) * 100, 100)
-  const color = score >= 7 ? '#e8c84a' : score >= 4 ? '#f0a500' : '#4a8fff'
-  const label = score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW'
+  const pct = Math.min(Math.max(score, 0), 100)
+  const color = score >= 70 ? '#e8c84a' : score >= 40 ? '#f0a500' : '#4a8fff'
+  const label = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
   return (
     <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
@@ -41,7 +41,7 @@ function UpsetMeter({ score }) {
         </span>
         <span style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', lineHeight: 1, color }}>{score}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)' }}>/10</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)' }}>/100</span>
         </span>
       </div>
       <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
