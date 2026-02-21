@@ -11,9 +11,14 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+Optional env var:
+
+- `MATCHUP_CSV_PATH` (override default `backend/data/nation_matchup_probabilities_proxy_logreg_ALL_pairs_calibrated.csv`)
+
 ## Endpoints
 
 - `GET /health`
+- `GET /teams`
 - `POST /predict-matchup`
 
 Example request body:

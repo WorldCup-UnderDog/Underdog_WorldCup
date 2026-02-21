@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseClient } from '../lib/supabase'
 import { ROUTES } from '../routes'
 
-const TEAMS = [
+const DEFAULT_TEAMS = [
   'Canada', 'Mexico', 'United States',
   'Australia', 'Iran', 'Japan', 'Jordan', 'South Korea', 'Qatar', 'Saudi Arabia', 'Uzbekistan',
   'Algeria', 'Cape Verde', 'Egypt', 'Ghana', 'Ivory Coast', 'Morocco', 'Senegal', 'South Africa', 'Tunisia',
@@ -107,7 +107,7 @@ function TeamCard({ team, prob, isWinner, side }) {
   )
 }
 
-function TeamSelector({ id, label, value, onChange, exclude }) {
+function TeamSelector({ id, label, value, onChange, exclude, teams, disabled = false }) {
   const flag = getFlag(value)
   return (
     <div style={{ flex: 1 }}>
@@ -123,6 +123,7 @@ function TeamSelector({ id, label, value, onChange, exclude }) {
         <select
           id={id}
           value={value}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.value)}
           style={{
             width: '100%',
@@ -135,14 +136,15 @@ function TeamSelector({ id, label, value, onChange, exclude }) {
             fontWeight: 500,
             padding: '0.8rem 1rem 0.8rem 3rem',
             appearance: 'none',
-            cursor: 'pointer',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.7 : 1,
             outline: 'none',
             transition: 'border-color 0.2s',
           }}
           onFocus={e => e.target.style.borderColor = 'rgba(26,79,255,0.5)'}
           onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.09)'}
         >
-          {TEAMS.filter(t => t !== exclude).map((team) => (
+          {teams.filter(t => t !== exclude).map((team) => (
             <option key={team} value={team} style={{ background: '#0a1628' }}>{team}</option>
           ))}
         </select>
@@ -158,6 +160,9 @@ function TeamSelector({ id, label, value, onChange, exclude }) {
 function MatchupPage() {
   const [loadingSession, setLoadingSession] = useState(true)
   const [sessionError, setSessionError] = useState('')
+  const [loadingTeams, setLoadingTeams] = useState(true)
+  const [teamsError, setTeamsError] = useState('')
+  const [teamOptions, setTeamOptions] = useState(DEFAULT_TEAMS)
 
   const [teamA, setTeamA] = useState('Germany')
   const [teamB, setTeamB] = useState('Morocco')
@@ -191,9 +196,51 @@ function MatchupPage() {
     return () => { mounted = false }
   }, [])
 
+  useEffect(() => {
+    let mounted = true
+    async function loadSupportedTeams() {
+      setLoadingTeams(true)
+      setTeamsError('')
+      try {
+        const response = await fetch(`${apiBaseUrl}/teams`)
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}))
+          throw new Error(payload.detail || `Failed to load teams (${response.status})`)
+        }
+        const payload = await response.json()
+        const teams = Array.isArray(payload?.teams) ? payload.teams.filter(Boolean) : []
+        if (teams.length < 2) throw new Error('Model team list is empty.')
+
+        if (mounted) {
+          setTeamOptions(teams)
+          setTeamA((prevA) => {
+            const nextA = teams.includes(prevA) ? prevA : teams[0]
+            setTeamB((prevB) => {
+              if (prevB !== nextA && teams.includes(prevB)) return prevB
+              return teams.find((team) => team !== nextA) || nextA
+            })
+            return nextA
+          })
+        }
+      } catch (err) {
+        if (mounted) {
+          setTeamOptions(DEFAULT_TEAMS)
+          setTeamsError(err.message || 'Failed to sync teams from API.')
+        }
+      } finally {
+        if (mounted) setLoadingTeams(false)
+      }
+    }
+
+    loadSupportedTeams()
+    return () => { mounted = false }
+  }, [apiBaseUrl])
+
   async function handlePredict(event) {
     event.preventDefault()
     setError('')
+    if (loadingTeams) { setError('Still loading model-supported teams. Please wait.'); return }
+    if (teamOptions.length < 2) { setError('No supported teams are available right now.'); return }
     if (teamA === teamB) { setError('Please choose two different teams.'); return }
     setSubmitting(true)
     try {
@@ -202,7 +249,10 @@ function MatchupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ team_a: teamA, team_b: teamB, neutral_site: neutralSite }),
       })
-      if (!response.ok) throw new Error(`Prediction request failed (${response.status})`)
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.detail || `Prediction request failed (${response.status})`)
+      }
       const data = await response.json()
       setResult(data)
       setHasRun(true)
@@ -220,7 +270,8 @@ function MatchupPage() {
     finally { window.location.href = ROUTES.HOME }
   }
 
-  const confidenceColor = result?.confidence === 'High' ? '#4aff9f' : result?.confidence === 'Medium' ? '#f0a500' : '#7a8ba0'
+  const confidenceLevel = (result?.confidence || '').toLowerCase()
+  const confidenceColor = confidenceLevel === 'high' ? '#4aff9f' : confidenceLevel === 'medium' ? '#f0a500' : '#7a8ba0'
 
   return (
     <>
@@ -551,6 +602,14 @@ function MatchupPage() {
           {!!sessionError && (
             <div className="error-alert">⚠ {sessionError}</div>
           )}
+          {!loadingSession && !sessionError && loadingTeams && (
+            <div style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', padding: '0 0 1rem' }}>
+              Loading model-supported teams...
+            </div>
+          )}
+          {!loadingSession && !sessionError && !!teamsError && (
+            <div className="error-alert">⚠ {teamsError}</div>
+          )}
 
           {/* BUILDER */}
           {!loadingSession && !sessionError && (
@@ -562,12 +621,16 @@ function MatchupPage() {
                     id="team-a" label="Home Team / Team A"
                     value={teamA} onChange={(v) => { setTeamA(v); setResult(null); setHasRun(false) }}
                     exclude={teamB}
+                    teams={teamOptions}
+                    disabled={loadingTeams || submitting}
                   />
-                  <button type="button" className="swap-btn" onClick={handleSwap} title="Swap teams">⇄</button>
+                  <button type="button" className="swap-btn" onClick={handleSwap} title="Swap teams" disabled={loadingTeams || submitting}>⇄</button>
                   <TeamSelector
                     id="team-b" label="Away Team / Team B"
                     value={teamB} onChange={(v) => { setTeamB(v); setResult(null); setHasRun(false) }}
                     exclude={teamA}
+                    teams={teamOptions}
+                    disabled={loadingTeams || submitting}
                   />
                 </div>
 
@@ -592,9 +655,9 @@ function MatchupPage() {
                 <button
                   type="submit"
                   className={`predict-btn${submitting ? ' loading' : ''}`}
-                  disabled={submitting}
+                  disabled={submitting || loadingTeams || teamOptions.length < 2}
                 >
-                  {submitting ? 'Running Simulation...' : '⚡ Predict Matchup'}
+                  {loadingTeams ? 'Loading Teams...' : submitting ? 'Running Simulation...' : '⚡ Predict Matchup'}
                 </button>
               </div>
 
