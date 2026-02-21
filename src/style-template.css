@@ -221,6 +221,17 @@
   gap: 0.65rem;
 }
 
+.roster-tile-link {
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.roster-tile-link:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
 .roster-flag {
   width: 36px;
   height: 24px;
@@ -244,6 +255,134 @@
   color: var(--text);
 }
 
+.team-roster-detail {
+  margin-top: 1rem;
+}
+
+.team-roster-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.team-roster-flag {
+  width: 54px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  flex-shrink: 0;
+}
+
+.team-roster-flag-fallback {
+  font-size: 2rem;
+  line-height: 1;
+  width: 54px;
+  display: inline-flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.team-roster-title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.team-roster-subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.team-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.team-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0.8rem;
+}
+
+.team-stat-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.team-stat-value {
+  margin: 0.35rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.team-player-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.selected-player-card {
+  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+}
+
+.selected-player-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.selected-player-name {
+  margin: 0.3rem 0 0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.selected-player-meta {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.team-player-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-player-table th,
+.team-player-table td {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.team-player-table th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.team-player-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 @media (max-width: 600px) {
   .template-topbar {
     padding: 1rem 1.25rem;
@@ -258,6 +397,10 @@
   }
 
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-stats-grid {
     grid-template-columns: 1fr;
   }
 }

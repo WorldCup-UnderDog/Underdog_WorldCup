@@ -6,7 +6,8 @@ import LoggedInPage from './pages/LoggedInPage'
 import LandingPage from './pages/LandingPage'
 import MatchupPage from './pages/MatchupPage'
 import TeamRosterPage from './pages/TeamRosterPage'
-import { ROUTES } from './routes'
+import TeamRosterDetailPage from './pages/TeamRosterDetailPage'
+import { ROUTES, getTeamFromRosterPath } from './routes'
 
 function AuthPage({ mode }) {
   const isLogin = mode === 'login'
@@ -173,6 +174,11 @@ function App() {
 
   if (path === ROUTES.ROSTERS) {
     return <TeamRosterPage />
+  }
+
+  const teamFromRosterPath = getTeamFromRosterPath(path)
+  if (teamFromRosterPath) {
+    return <TeamRosterDetailPage teamName={teamFromRosterPath} />
   }
 
   return <LandingPage />

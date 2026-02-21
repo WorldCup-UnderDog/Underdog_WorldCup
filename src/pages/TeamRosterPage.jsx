@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseClient } from '../lib/supabase'
-import { ROUTES } from '../routes'
+import { ROUTES, getTeamRosterRoute } from '../routes'
 import RosterControls from '../features/roster/components/RosterControls'
 import RosterGrid from '../features/roster/components/RosterGrid'
 import RosterHeader from '../features/roster/components/RosterHeader'
@@ -87,7 +87,11 @@ function TeamRosterPage() {
                 filteredCount={filteredTeams.length}
                 totalCount={WORLD_CUP_TEAMS.length}
               />
-              <RosterGrid teams={filteredTeams} getFlagSrc={getFlagSrc} />
+              <RosterGrid
+                teams={filteredTeams}
+                getFlagSrc={getFlagSrc}
+                getTeamHref={getTeamRosterRoute}
+              />
             </>
           )}
         </section>
