@@ -225,7 +225,8 @@ function MatchupPage() {
       } catch (err) {
         if (mounted) {
           setTeamOptions(DEFAULT_TEAMS)
-          setTeamsError(err.message || 'Failed to sync teams from API.')
+          const baseMessage = err.message || 'Failed to sync teams from API.'
+          setTeamsError(`${baseMessage} (API: ${apiBaseUrl})`)
         }
       } finally {
         if (mounted) setLoadingTeams(false)

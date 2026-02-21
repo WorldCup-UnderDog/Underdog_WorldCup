@@ -24,10 +24,22 @@ from app.services.predictor import (
 
 app = FastAPI(title="Dark Horse Matchup API", version="0.1.0")
 
-# Local-dev CORS. Restrict in production.
+
+def _cors_allow_origins() -> list[str]:
+    configured = os.getenv("CORS_ALLOW_ORIGINS", "").strip()
+    if configured:
+        return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
+    return ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
+# Local-dev defaults allow localhost/127.0.0.1 on any port.
+# Use CORS_ALLOW_ORIGINS and/or CORS_ALLOW_ORIGIN_REGEX for deployed environments.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_cors_allow_origins(),
+    allow_origin_regex=os.getenv(
+        "CORS_ALLOW_ORIGIN_REGEX", r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
