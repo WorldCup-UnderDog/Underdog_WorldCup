@@ -321,19 +321,6 @@ function MatchupPage() {
 
         .nav-actions { display: flex; gap: 0.5rem; }
 
-        .btn-ghost {
-          background: var(--glass);
-          border: 1px solid var(--glass-border);
-          color: var(--muted);
-          padding: 0.45rem 1rem;
-          border-radius: 8px;
-          font-family: var(--font-body);
-          font-size: 0.82rem; font-weight: 500;
-          cursor: pointer; text-decoration: none;
-          transition: color 0.2s, border-color 0.2s;
-        }
-        .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
-
         .matchup-main {
           max-width: 900px; margin: 0 auto;
           padding: 3rem 2rem 5rem;
