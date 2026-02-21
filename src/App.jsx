@@ -4,6 +4,7 @@ import './style-template.css'
 import { getSupabaseClient } from './lib/supabase'
 import LoggedInPage from './pages/LoggedInPage'
 import LandingPage from './pages/LandingPage'
+import MatchupPage from './pages/MatchupPage'
 import { ROUTES } from './routes'
 
 function AuthPage({ mode }) {
@@ -163,6 +164,10 @@ function App() {
 
   if (path === ROUTES.APP) {
     return <LoggedInPage />
+  }
+
+  if (path === ROUTES.MATCHUP) {
+    return <MatchupPage />
   }
 
   return <LandingPage />

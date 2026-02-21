@@ -73,7 +73,12 @@ function LoggedInPage() {
           <div className="dashboard-grid">
             <article className="dashboard-panel">
               <h3>Predictions</h3>
-              <p>Placeholder for upcoming predictions list page.</p>
+              <p>Select two teams and run a matchup prediction.</p>
+              <p style={{ marginTop: '0.7rem' }}>
+                <a className="template-link" href={ROUTES.MATCHUP}>
+                  Open Matchup Tool
+                </a>
+              </p>
             </article>
             <article className="dashboard-panel">
               <h3>My Picks</h3>
