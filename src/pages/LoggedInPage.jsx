@@ -1,98 +1,219 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import useMyProfile from '../features/profile/hooks/useMyProfile'
 import { getSupabaseClient } from '../lib/supabase'
 import { ROUTES } from '../routes'
 
-function LoggedInPage() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+function ProfileCard({ name, username, email, flagSrc, isComplete, onEdit }) {
+  return (
+    <article className="dashboard-profile-card dashboard-fade-up">
+      <div className="dashboard-profile-card-head">
+        <div className="dashboard-profile-card-identity">
+          <span className="dashboard-profile-card-flag">
+            {flagSrc ? <img className="dashboard-profile-card-flag-image" src={flagSrc} alt="" /> : '🏳️'}
+          </span>
+          <div>
+            <p className="dashboard-profile-card-name">{name}</p>
+            <p className="dashboard-profile-card-handle">@{username || 'username'}</p>
+          </div>
+        </div>
+        <span className={`dashboard-profile-pill${isComplete ? ' complete' : ''}`}>
+          {isComplete ? 'Profile Complete' : 'Profile Incomplete'}
+        </span>
+      </div>
+
+      <p className="dashboard-profile-card-email">{email}</p>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="dashboard-edit-button"
+      >
+        Edit Profile
+      </button>
+    </article>
+  )
+}
+
+function FeatureCard({ title, description, linkLabel, icon, onClick, isHovered, onHoverChange, animationClass }) {
+  return (
+    <article
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+      className={`dashboard-feature-card dashboard-fade-up ${animationClass}${isHovered ? ' hovered' : ''}`}
+    >
+      <div className="dashboard-feature-icon">
+        {icon}
+      </div>
+      <h3 className="dashboard-feature-title">{title}</h3>
+      <p className="dashboard-feature-description">{description}</p>
+
+      <button
+        type="button"
+        onClick={onClick}
+        className="dashboard-feature-cta"
+      >
+        {linkLabel}
+        <span className="dashboard-feature-arrow" aria-hidden="true">→</span>
+      </button>
+    </article>
+  )
+}
+
+export default function Dashboard() {
+  const {
+    loading,
+    error,
+    email,
+    displayName,
+    username,
+    flagSrc,
+    profileComplete,
+  } = useMyProfile()
+
+  const [hoveredCard, setHoveredCard] = useState('')
+  const [clickedAction, setClickedAction] = useState('')
 
   useEffect(() => {
-    let mounted = true
+    const fontLinkId = 'dashboard-display-font'
+    const keyframeStyleId = 'dashboard-keyframes'
 
-    async function loadSession() {
-      try {
-        const supabase = getSupabaseClient()
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
-
-        if (sessionError) throw sessionError
-
-        if (!session?.user) {
-          window.location.href = ROUTES.LOGIN
-          return
-        }
-
-        if (mounted) setEmail(session.user.email || '')
-      } catch (err) {
-        if (mounted) setError(err.message || 'Failed to load session')
-      } finally {
-        if (mounted) setLoading(false)
-      }
+    let fontLink = document.getElementById(fontLinkId)
+    if (!fontLink) {
+      fontLink = document.createElement('link')
+      fontLink.id = fontLinkId
+      fontLink.rel = 'stylesheet'
+      fontLink.href = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap'
+      document.head.appendChild(fontLink)
     }
 
-    loadSession()
+    let keyframeStyle = document.getElementById(keyframeStyleId)
+    if (!keyframeStyle) {
+      keyframeStyle = document.createElement('style')
+      keyframeStyle.id = keyframeStyleId
+      keyframeStyle.textContent = `
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `
+      document.head.appendChild(keyframeStyle)
+    }
 
     return () => {
-      mounted = false
+      if (fontLink && fontLink.parentNode) fontLink.parentNode.removeChild(fontLink)
+      if (keyframeStyle && keyframeStyle.parentNode) keyframeStyle.parentNode.removeChild(keyframeStyle)
     }
   }, [])
 
-  async function handleLogout() {
+  const features = useMemo(
+    () => [
+      {
+        id: 'predictions',
+        title: 'Predictions',
+        description: 'Select two teams and run a matchup prediction.',
+        linkLabel: 'Open Matchup Tool',
+        icon: '⚡',
+        href: ROUTES.MATCHUP,
+      },
+      {
+        id: 'roster',
+        title: 'Team Roster Overview',
+        description: 'Browse all world cup teams in a static roster list.',
+        linkLabel: 'Open Team Roster',
+        icon: '🌍',
+        href: ROUTES.ROSTERS,
+      },
+    ],
+    []
+  )
+
+  const handleFeatureClick = (feature) => {
+    setClickedAction(feature.id)
+    window.location.assign(feature.href)
+  }
+
+  const handleEditProfile = () => {
+    setClickedAction('profile')
+    window.location.assign(ROUTES.PROFILE)
+  }
+
+  const handleLogout = async () => {
+    setClickedAction('logout')
     try {
       const supabase = getSupabaseClient()
       await supabase.auth.signOut()
     } finally {
-      window.location.href = ROUTES.HOME
+      window.location.assign(ROUTES.HOME)
     }
   }
 
   return (
-    <div className="template-page">
-      <div className="template-topbar dashboard-topbar">
-        <a href={ROUTES.HOME} className="logo">
-          UNDER<span>DOG</span>
-        </a>
-        <button type="button" className="template-button template-button-secondary" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+    <div className="template-page dashboard-redesign-page">
+      <div aria-hidden="true" className="dashboard-grid-overlay" />
 
-      <main className="template-main dashboard-main">
-        <section className="template-card dashboard-card">
-          <p className="section-label">Temporary App Home</p>
-          <h1 className="template-title">You are logged in</h1>
-          {loading && <p className="template-subtitle">Checking your session...</p>}
-          {!loading && !error && (
-            <p className="template-subtitle">Signed in as: {email || 'Unknown user'}</p>
+      <header className="template-topbar dashboard-topbar dashboard-redesign-topbar">
+        <div className="template-container dashboard-redesign-topbar-inner">
+          <a href={ROUTES.HOME} className="logo">
+            UNDER<span>DOG</span>
+          </a>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="dashboard-logout-button"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main className="template-main dashboard-main dashboard-redesign-main">
+        <section className="template-card dashboard-card dashboard-home-card dashboard-shell">
+          <section className="dashboard-fade-up">
+            <p className="section-label">App Dashboard</p>
+            <h1 className="dashboard-welcome-title">
+            Welcome Back
+            </h1>
+            <p className="dashboard-welcome-subtitle">
+              {loading ? 'Checking your session and profile...' : `Signed in as: ${email || 'Unknown user'}`}
+            </p>
+            {!!error && (
+              <p className="template-alert template-alert-error">{error}</p>
+            )}
+          </section>
+
+          <section className="dashboard-profile-row">
+            <ProfileCard
+              name={displayName}
+              username={username}
+              email={email}
+              flagSrc={flagSrc}
+              isComplete={profileComplete}
+              onEdit={handleEditProfile}
+            />
+          </section>
+
+          <section className="dashboard-feature-grid">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={feature.id}
+                title={feature.title}
+                description={feature.description}
+                linkLabel={feature.linkLabel}
+                icon={feature.icon}
+                onClick={() => handleFeatureClick(feature)}
+                isHovered={hoveredCard === feature.id}
+                onHoverChange={(isOn) => setHoveredCard(isOn ? feature.id : '')}
+                animationClass={index === 0 ? ' dashboard-delay-1' : ' dashboard-delay-2'}
+              />
+            ))}
+          </section>
+
+          {clickedAction && (
+            <p className="dashboard-action-feedback">
+              Action triggered: <span>{clickedAction}</span>
+            </p>
           )}
-          {!!error && <p className="template-alert template-alert-error">{error}</p>}
-
-          <div className="dashboard-grid">
-            <article className="dashboard-panel">
-              <h3>Predictions</h3>
-              <p>Select two teams and run a matchup prediction.</p>
-              <p style={{ marginTop: '0.7rem' }}>
-                <a className="template-link" href={ROUTES.MATCHUP}>
-                  Open Matchup Tool
-                </a>
-              </p>
-            </article>
-            <article className="dashboard-panel">
-              <h3>My Picks</h3>
-              <p>Placeholder for user picks and saved upsets.</p>
-            </article>
-            <article className="dashboard-panel">
-              <h3>Profile</h3>
-              <p>Placeholder for account and preferences settings.</p>
-            </article>
-          </div>
         </section>
       </main>
     </div>
   )
 }
-
-export default LoggedInPage

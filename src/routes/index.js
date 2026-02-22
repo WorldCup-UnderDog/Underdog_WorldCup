@@ -3,5 +3,25 @@ export const ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   APP: '/app',
+  PROFILE: '/app/profile',
   MATCHUP: '/app/matchup',
+  ROSTERS: '/app/rosters',
+}
+
+export function getTeamRosterRoute(teamName) {
+  return `${ROUTES.ROSTERS}/${encodeURIComponent(teamName)}`
+}
+
+export function getTeamFromRosterPath(pathname) {
+  const prefix = `${ROUTES.ROSTERS}/`
+  if (!pathname.startsWith(prefix)) return ''
+
+  const encodedTeam = pathname.slice(prefix.length)
+  if (!encodedTeam) return ''
+
+  try {
+    return decodeURIComponent(encodedTeam)
+  } catch {
+    return ''
+  }
 }

@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import './style-template.css'
 import { getSupabaseClient } from './lib/supabase'
+import { fetchProfile, isProfileComplete } from './lib/profile'
 import LoggedInPage from './pages/LoggedInPage'
 import LandingPage from './pages/LandingPage'
 import MatchupPage from './pages/MatchupPage'
-import { ROUTES } from './routes'
+import ProfilePage from './pages/ProfilePage'
+import TeamRosterPage from './pages/TeamRosterPage'
+import TeamRosterDetailPage from './pages/TeamRosterDetailPage'
+import { ROUTES, getTeamFromRosterPath } from './routes'
 
 function AuthPage({ mode }) {
   const isLogin = mode === 'login'
@@ -151,6 +155,79 @@ function AuthPage({ mode }) {
   )
 }
 
+function AppHomeGate() {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function load() {
+      try {
+        const supabase = getSupabaseClient()
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
+
+        if (sessionError) throw sessionError
+        if (!session?.user) {
+          window.location.href = ROUTES.LOGIN
+          return
+        }
+
+        const profile = await fetchProfile(session.user.id).catch(() => null)
+        if (!isProfileComplete(profile)) {
+          window.location.href = `${ROUTES.PROFILE}?onboarding=1`
+          return
+        }
+
+        if (mounted) setReady(true)
+      } catch (err) {
+        if (mounted) setError(err.message || 'Failed to verify profile')
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="template-page">
+        <main className="template-main">
+          <section className="template-card">
+            <p className="template-subtitle">Loading account...</p>
+          </section>
+        </main>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="template-page">
+        <main className="template-main">
+          <section className="template-card">
+            <p className="template-alert template-alert-error">{error}</p>
+            <p className="template-switch">
+              <a className="template-link" href={ROUTES.PROFILE}>Open Profile Setup</a>
+            </p>
+          </section>
+        </main>
+      </div>
+    )
+  }
+
+  if (!ready) return null
+  return <LoggedInPage />
+}
+
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || ROUTES.HOME
 
@@ -162,12 +239,25 @@ function App() {
     return <AuthPage mode="signup" />
   }
 
+  if (path === ROUTES.PROFILE) {
+    return <ProfilePage />
+  }
+
   if (path === ROUTES.APP) {
-    return <LoggedInPage />
+    return <AppHomeGate />
   }
 
   if (path === ROUTES.MATCHUP) {
     return <MatchupPage />
+  }
+
+  if (path === ROUTES.ROSTERS) {
+    return <TeamRosterPage />
+  }
+
+  const teamFromRosterPath = getTeamFromRosterPath(path)
+  if (teamFromRosterPath) {
+    return <TeamRosterDetailPage teamName={teamFromRosterPath} />
   }
 
   return <LandingPage />
