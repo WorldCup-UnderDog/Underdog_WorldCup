@@ -38,6 +38,7 @@ const SORT_ORDER = {
 // Line priority for sorting outfield players defender → midfielder → attacker
 const LINE_PRIORITY = { DEF: 1, MID: 2, ATT: 3 }
 
+//Best choice of formation for each team based on their typical playing style and historical data
 export const TEAM_FORMATIONS = {
   // 4-3-3
   Spain: '4-3-3',

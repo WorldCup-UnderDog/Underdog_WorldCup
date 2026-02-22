@@ -1,5 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
+
+//Nation Rankings in terms of FIFA World Rankings as of June 2024. In a real app, this would come from an API or database, but we'll hardcode it here for simplicity.
 const FIFA_RANKINGS = {
   Spain: 1,
   Argentina: 2,
