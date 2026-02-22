@@ -17,3 +17,19 @@ export async function fetchUpsetScore(teamA, teamB, scoreA, scoreB) {
   });
   return res.json();
 }
+
+
+export async function fetchPlayersByNation(nation) {
+  const res = await fetch(`${BASE_URL}/players/${nation}`);
+  return res.json();
+}
+
+export async function fetchTopUpsetPlayers() {
+  const res = await fetch(`${BASE_URL}/players/top-upsets`);
+  return res.json();
+}
+
+export async function fetchGKWallRanking() {
+  const res = await fetch(`${BASE_URL}/goalkeepers/wall-ranking`);
+  return res.json();
+}
