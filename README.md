@@ -109,7 +109,7 @@ For backend-specific notes, see `backend/README.md`.
 
 Higher DarkScore = higher upset likelihood.
 
-Additionally, Sphinx was used to generate hexagon attribute radar visualizations for individual players using six axes:
+Additionally, Sphinx was used as a way to implement visualizations for individual player stats using six axes directly on our frontend:
 
 - Pace  
 - Shooting  
@@ -118,6 +118,6 @@ Additionally, Sphinx was used to generate hexagon attribute radar visualizations
 - Defending  
 - Physical  
 
-These radar plots provide visual comparison of player strengths and support frontend storytelling for upset candidates.
+These radar plots provide a visual comparison of player strengths and support frontend storytelling for upset candidates.
 
 
