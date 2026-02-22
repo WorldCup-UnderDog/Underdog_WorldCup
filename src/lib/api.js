@@ -1,75 +1,108 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+
+async function parseErrorMessage(res) {
+  const text = await res.text();
+  if (!text) return `Request failed (${res.status})`;
+  try {
+    const parsed = JSON.parse(text);
+    return parsed.detail || parsed.message || text;
+  } catch {
+    return text;
+  }
+}
+
+export async function apiRequest(path, options = {}) {
+  const {
+    method = "GET",
+    body,
+    headers = {},
+    query = null,
+  } = options;
+
+  const url = new URL(`${BASE_URL}${path}`);
+  if (query && typeof query === "object") {
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        url.searchParams.set(key, String(value));
+      }
+    });
+  }
+
+  const requestHeaders = { ...headers };
+  const requestInit = { method, headers: requestHeaders };
+  if (body !== undefined) {
+    requestHeaders["Content-Type"] = requestHeaders["Content-Type"] || "application/json";
+    requestInit.body = requestHeaders["Content-Type"] === "application/json" && typeof body !== "string"
+      ? JSON.stringify(body)
+      : body;
+  }
+
+  const res = await fetch(url.toString(), requestInit);
+  if (!res.ok) {
+    throw new Error(await parseErrorMessage(res));
+  }
+  return res.json();
+}
+
+export async function fetchSupportedTeams() {
+  return apiRequest("/teams");
+}
+
+export async function fetchMatchupPrediction(teamA, teamB, neutralSite = true) {
+  return apiRequest("/predict-matchup", {
+    method: "POST",
+    body: { team_a: teamA, team_b: teamB, neutral_site: neutralSite },
+  });
+}
 
 export async function fetchMatchProbability(teamA, teamB) {
-  const res = await fetch(`${BASE_URL}/predict`, {
+  return apiRequest("/predict", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ team_a: teamA, team_b: teamB }),
+    body: { team_a: teamA, team_b: teamB },
   });
-  return res.json();
 }
 
 export async function fetchUpsetScore(teamA, teamB, scoreA, scoreB) {
-  const res = await fetch(`${BASE_URL}/upset`, {
+  return apiRequest("/upset", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ team_a: teamA, team_b: teamB, score_a: scoreA, score_b: scoreB }),
+    body: { team_a: teamA, team_b: teamB, score_a: scoreA, score_b: scoreB },
   });
-  return res.json();
 }
 
-
 export async function fetchPlayersByNation(nation) {
-  const res = await fetch(`${BASE_URL}/players/${nation}`);
-  return res.json();
+  return apiRequest(`/players/${encodeURIComponent(nation)}`);
 }
 
 export async function fetchTopUpsetPlayers() {
-  const res = await fetch(`${BASE_URL}/players/top-upsets`);
-  return res.json();
+  return apiRequest("/players/top-upsets");
 }
 
 export async function fetchGKWallRanking() {
-  const res = await fetch(`${BASE_URL}/goalkeepers/wall-ranking`);
-  return res.json();
+  return apiRequest("/goalkeepers/wall-ranking");
 }
 
-
 export async function fetchPlayers(nation = null, position = null) {
-  const params = new URLSearchParams();
-  if (nation) params.append("nation", nation);
-  if (position) params.append("position", position);
-  const res = await fetch(`${BASE_URL}/players?${params}`);
-  return res.json();
+  return apiRequest("/players", { query: { nation, position } });
 }
 
 export async function fetchPlayer(name) {
-  const res = await fetch(`${BASE_URL}/player/${encodeURIComponent(name)}`);
-  return res.json();
+  return apiRequest(`/player/${encodeURIComponent(name)}`);
 }
 
-export async function fetchDarkScore(homeTeam, awayTeam, stageName = 'group stage') {
-  const res = await fetch(`${BASE_URL}/dark-score`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ home_team: homeTeam, away_team: awayTeam, stage_name: stageName }),
-  })
-  if (!res.ok) throw new Error(await res.text())
-  return res.json()
+export async function fetchDarkScore(homeTeam, awayTeam, stageName = "group stage") {
+  return apiRequest("/dark-score", {
+    method: "POST",
+    body: { home_team: homeTeam, away_team: awayTeam, stage_name: stageName },
+  });
 }
 
 export async function fetchDemoPredictions() {
-  const res = await fetch(`${BASE_URL}/demo-predictions`)
-  if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return apiRequest("/demo-predictions");
 }
 
 export async function fetchEloCompare(teamA, teamB) {
-  const res = await fetch(`${BASE_URL}/elo/compare`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ team_a: teamA, team_b: teamB }),
-  })
-  if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return apiRequest("/elo/compare", {
+    method: "POST",
+    body: { team_a: teamA, team_b: teamB },
+  });
 }

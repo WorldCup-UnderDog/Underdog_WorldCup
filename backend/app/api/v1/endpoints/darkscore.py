@@ -34,6 +34,28 @@ def predict_dark_score(
 
     fc = result.get("fc_adjustment", {})
     dark_knight = result.get("dark_knight", {})
+    dark_knights_raw = result.get("dark_knights", [])
+    dark_knights = []
+    if isinstance(dark_knights_raw, list):
+        for item in dark_knights_raw:
+            if not isinstance(item, dict):
+                continue
+            dark_knights.append({
+                "team": item.get("team", "Data missing"),
+                "player_name": item.get("player_name", "Data missing"),
+                "position": item.get("position", "Data missing"),
+                "skill_score": int(item.get("skill_score", 0) or 0),
+                "reason": item.get("reason", "No player-impact summary available."),
+            })
+    if not dark_knights:
+        dark_knights = [{
+            "team": dark_knight.get("team", "Data missing"),
+            "player_name": dark_knight.get("player_name", "Data missing"),
+            "position": dark_knight.get("position", "Data missing"),
+            "skill_score": int(dark_knight.get("skill_score", 0) or 0),
+            "reason": dark_knight.get("reason", "No player-impact summary available."),
+        }]
+
     return DarkScoreResponse(
         home_team=result["home_team"],
         away_team=result["away_team"],
@@ -44,7 +66,7 @@ def predict_dark_score(
         p_model=result["p_model"],
         p_model_raw=result["p_model_raw"],
         p_final=result["p_final"],
-        dark_score=result["DarkScore"],
+        dark_score=float(result["DarkScore"]),
         alert=result["Alert"],
         fc_adjustment={
             "used_fc": fc.get("used_fc", False),
@@ -54,17 +76,20 @@ def predict_dark_score(
             "delta_logit": fc.get("delta_logit", 0.0),
         },
         explanations=result.get("explanations", []),
-        risk_band=result.get("risk_band", "Watchlist"),
-        impact_level=result.get("impact_level", "Volatile"),
+        risk_band=result.get("risk_band", "Mean range (~52.5)"),
+        impact_level=result.get("impact_level", "Balanced upset pressure"),
         fan_summary=result.get("fan_summary", "Model summary unavailable."),
         fan_takeaways=result.get("fan_takeaways", []),
+        dark_knight_rule=result.get("dark_knight_rule", "No Dark Knight rule available."),
+        dark_knight_team=result.get("dark_knight_team", dark_knights[0]["team"]),
         dark_knight={
-            "team": dark_knight.get("team", "Data missing"),
-            "player_name": dark_knight.get("player_name", "Data missing"),
-            "position": dark_knight.get("position", "Data missing"),
-            "skill_score": int(dark_knight.get("skill_score", 0) or 0),
-            "reason": dark_knight.get("reason", "No player-impact summary available."),
+            "team": dark_knights[0]["team"],
+            "player_name": dark_knights[0]["player_name"],
+            "position": dark_knights[0]["position"],
+            "skill_score": int(dark_knights[0]["skill_score"] or 0),
+            "reason": dark_knights[0]["reason"],
         },
+        dark_knights=dark_knights,
     )
 
 
@@ -81,13 +106,15 @@ def get_demo_predictions(
             "favorite_by_elo": r.get("favorite_by_elo", ""),
             "underdog_by_elo": r.get("underdog_by_elo", ""),
             "p_final": float(r.get("p_final") or 0.0),
-            "dark_score": int(r.get("dark_score") or r.get("DarkScore") or 0),
+            "dark_score": float(r.get("dark_score") or r.get("DarkScore") or 0.0),
             "alert": bool(r.get("alert") or r.get("Alert") or False),
             "fc_used": bool(r.get("fc_used") or False),
             "external_elo_home": r.get("external_elo_home"),
             "external_elo_away": r.get("external_elo_away"),
             "external_p_home_win": r.get("external_p_home_win"),
             "external_p_away_win": r.get("external_p_away_win"),
+            "description": r.get("description"),
+            "focus_players": r.get("focus_players") or [],
         })
     return DemoPredictionsResponse(predictions=predictions)
 

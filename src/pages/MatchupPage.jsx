@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseClient } from '../lib/supabase'
 import { ROUTES } from '../routes'
-import { fetchDarkScore, fetchDemoPredictions } from '../lib/api'
+import {
+  fetchDarkScore,
+  fetchDemoPredictions,
+  fetchMatchupPrediction,
+  fetchSupportedTeams,
+} from '../lib/api'
+import { getFlagSrc } from '../features/roster/flags'
 
 const DEFAULT_TEAMS = [
   'Canada', 'Mexico', 'United States',
@@ -30,20 +36,42 @@ const FLAG_MAP = {
 
 const getFlag = (team) => FLAG_MAP[team] || '🏳️'
 
+function shouldHideExplanationLine(line) {
+  const text = String(line || '').toLowerCase()
+  if (!text) return true
+  if (text.includes('teams_elo.csv')) return true
+  if (text.startsWith('base probabilities come from')) return true
+  return false
+}
+
+function formatDarkScore(value) {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return '0.0'
+  return num.toFixed(1)
+}
+
+function FlagImg({ team, size = '2.8rem' }) {
+  const src = getFlagSrc(team)
+  if (src) {
+    return <img src={src} alt={team} style={{ width: size, height: 'auto', objectFit: 'contain', display: 'block' }} />
+  }
+  return <span style={{ fontSize: size, lineHeight: 1 }}>{getFlag(team)}</span>
+}
+
 function getDarkScoreTier(score) {
-  if (score >= 60) {
-    return { label: 'UPSET ALERT', color: 'var(--accent)' }
+  if (score >= 90) {
+    return { label: 'HIGH RANGE (>=90)', color: 'var(--accent)' }
   }
-  if (score >= 40) {
-    return { label: 'WATCHLIST', color: '#f0a500' }
+  if (score <= 15) {
+    return { label: 'LOW RANGE (<=15)', color: '#4a8fff' }
   }
-  return { label: 'LOW UPSET RISK', color: '#4a8fff' }
+  return { label: 'MEAN RANGE (~52.5)', color: '#f0a500' }
 }
 
 function UpsetMeter({ score }) {
   const pct = Math.min(Math.max(score, 0), 100)
-  const color = score >= 70 ? '#e8c84a' : score >= 40 ? '#f0a500' : '#4a8fff'
-  const label = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
+  const color = score >= 60 ? '#e8c84a' : score >= 40 ? '#f0a500' : '#4a8fff'
+  const label = score >= 60 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
   return (
     <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
@@ -86,7 +114,6 @@ function ProbBar({ label, pct, color }) {
 }
 
 function TeamCard({ team, prob, isWinner, side }) {
-  const flag = getFlag(team)
   return (
     <div style={{
       flex: 1,
@@ -107,7 +134,14 @@ function TeamCard({ team, prob, isWinner, side }) {
           padding: '0.2rem 0.45rem', borderRadius: '4px', letterSpacing: '0.08em',
         }}>PREDICTED WIN</div>
       )}
-      <div style={{ fontSize: '2.8rem', marginBottom: '0.5rem', lineHeight: 1 }}>{flag}</div>
+      <div style={{
+        marginBottom: '0.5rem',
+        lineHeight: 1,
+        display: 'flex',
+        justifyContent: side === 'right' ? 'flex-end' : 'flex-start',
+      }}>
+        <FlagImg team={team} size="2.8rem" />
+      </div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.03em', marginBottom: '0.2rem' }}>{team}</div>
       {prob !== undefined && (
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.8rem', lineHeight: 1, color: isWinner ? '#4a8fff' : 'var(--muted)' }}>
@@ -119,7 +153,6 @@ function TeamCard({ team, prob, isWinner, side }) {
 }
 
 function TeamSelector({ id, label, value, onChange, exclude, teams, disabled = false }) {
-  const flag = getFlag(value)
   return (
     <div style={{ flex: 1 }}>
       <label htmlFor={id} style={{
@@ -129,8 +162,8 @@ function TeamSelector({ id, label, value, onChange, exclude, teams, disabled = f
       <div style={{ position: 'relative' }}>
         <span style={{
           position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)',
-          fontSize: '1.3rem', pointerEvents: 'none', zIndex: 1,
-        }}>{flag}</span>
+          pointerEvents: 'none', zIndex: 1, display: 'flex', alignItems: 'center',
+        }}><FlagImg team={value} size="1.3rem" /></span>
         <select
           id={id}
           value={value}
@@ -221,12 +254,7 @@ function MatchupPage() {
       setLoadingTeams(true)
       setTeamsError('')
       try {
-        const response = await fetch(`${apiBaseUrl}/teams`)
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}))
-          throw new Error(payload.detail || `Failed to load teams (${response.status})`)
-        }
-        const payload = await response.json()
+        const payload = await fetchSupportedTeams()
         const teams = Array.isArray(payload?.teams) ? payload.teams.filter(Boolean) : []
         if (teams.length < 2) throw new Error('Model team list is empty.')
 
@@ -275,17 +303,7 @@ function MatchupPage() {
     setSubmitting(true)
     try {
       const [matchupRes, darkRes] = await Promise.allSettled([
-        fetch(`${apiBaseUrl}/predict-matchup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ team_a: teamA, team_b: teamB, neutral_site: neutralSite }),
-        }).then(async r => {
-          if (!r.ok) {
-            const payload = await r.json().catch(() => ({}))
-            throw new Error(payload.detail || `Prediction request failed (${r.status})`)
-          }
-          return r.json()
-        }),
+        fetchMatchupPrediction(teamA, teamB, neutralSite),
         fetchDarkScore(teamA, teamB, stageName),
       ])
       if (matchupRes.status === 'fulfilled') {
@@ -676,6 +694,12 @@ function MatchupPage() {
           background: rgba(232,200,74,0.06);
           padding: 0.9rem 1rem;
         }
+        .dark-knight-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0.55rem;
+          margin-bottom: 0.6rem;
+        }
         .dark-knight-label {
           font-family: var(--font-mono); font-size: 0.58rem;
           color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
@@ -888,6 +912,101 @@ function MatchupPage() {
                 />
               </div>
 
+              {/* DarkScore Card */}
+              {darkScoreResult && (() => {
+                const ds = darkScoreResult
+                const score = ds.dark_score
+                const tier = getDarkScoreTier(score)
+                const scoreColor = tier.color
+                const totalElo = (ds.elo_home_pre || 0) + (ds.elo_away_pre || 0)
+                const homePct = totalElo > 0 ? Math.round((ds.elo_home_pre / totalElo) * 100) : 50
+                const fanTakeaways = Array.isArray(ds.fan_takeaways) && ds.fan_takeaways.length > 0
+                  ? ds.fan_takeaways
+                  : (Array.isArray(ds.explanations) ? ds.explanations : [])
+                const filteredFanTakeaways = fanTakeaways.filter((line) => !shouldHideExplanationLine(line))
+                const darkKnights = Array.isArray(ds.dark_knights) && ds.dark_knights.length > 0
+                  ? ds.dark_knights
+                  : (ds.dark_knight ? [ds.dark_knight] : [])
+                const darkKnightLabel = darkKnights.length > 1 ? 'Dark Knights' : 'Dark Knight'
+                return (
+                  <div className="darkscore-card">
+                    <div className="darkscore-header">
+                      <span className="darkscore-label">DarkScore — ML Upset Model</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {ds.alert && <span className="darkscore-alert-badge">⚡ HIGH RANGE SIGNAL</span>}
+                        <span className="darkscore-tier-badge" style={{ color: tier.color }}>{ds.risk_band || tier.label}</span>
+                      </div>
+                    </div>
+
+                    <div className="darkscore-main">
+                      <div className="darkscore-number-wrap">
+                        <span className="darkscore-number" style={{ fontSize: '4rem', color: scoreColor }}>{formatDarkScore(score)}</span>
+                        <span className="darkscore-of">/100</span>
+                      </div>
+                      <div className="darkscore-teams">
+                        <div className="darkscore-team-row">Favorite: <strong>{ds.favorite_by_elo}</strong></div>
+                        <div className="darkscore-team-row">Underdog: <strong>{ds.underdog_by_elo}</strong></div>
+                        <div className="darkscore-team-row" style={{ marginTop: '0.2rem' }}>
+                          Upset probability: <strong style={{ color: scoreColor }}>{Math.round(ds.p_final * 100)}%</strong>
+                        </div>
+                        <div className="darkscore-team-row">
+                          Match impact: <strong>{ds.impact_level || 'Balanced upset pressure'}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="elo-bar-section">
+                      <div className="elo-bar-labels">
+                        <span>{ds.home_team} Elo {Math.round(ds.elo_home_pre)}</span>
+                        <span>{ds.away_team} Elo {Math.round(ds.elo_away_pre)}</span>
+                      </div>
+                      <div className="elo-bar-track">
+                        <div style={{ width: `${homePct}%`, height: '100%', background: 'linear-gradient(90deg, #1a4fff, #2563ff)', borderRadius: '100px 0 0 100px' }} />
+                        <div style={{ width: `${100 - homePct}%`, height: '100%', background: 'linear-gradient(90deg, #e84a4a, #ff6060)', borderRadius: '0 100px 100px 0' }} />
+                      </div>
+                    </div>
+
+                    <div className="darkscore-insight">
+                      <div className="darkscore-insight-title">What This Means</div>
+                      <div className="darkscore-insight-summary">
+                        {ds.fan_summary || 'Model summary unavailable for this matchup.'}
+                      </div>
+                    </div>
+
+                    {darkKnights.length > 0 && (
+                      <div className="dark-knight-grid">
+                        <div className="dark-knight-label">
+                          {darkKnightLabel}
+                          {ds.dark_knight_team ? ` · ${ds.dark_knight_team}` : ''}
+                        </div>
+                        {darkKnights.map((knight, idx) => (
+                          <div className="dark-knight-card" key={`${knight.player_name || 'player'}-${idx}`}>
+                            <div className="dark-knight-player">{knight.player_name || 'Data missing'}</div>
+                            <div className="dark-knight-meta">
+                              {(knight.team || 'Data missing')} · {(knight.position || 'Data missing')} · SKILL {(knight.skill_score ?? 'Data missing')}
+                            </div>
+                          </div>
+                        ))}
+                        <div className="dark-knight-reason">
+                          {ds.dark_knight_rule || darkKnights[0]?.reason || 'No player-impact summary available.'}
+                        </div>
+                      </div>
+                    )}
+
+                    {filteredFanTakeaways.length > 0 && (
+                      <ul className="explanation-list" style={{ marginTop: '0.5rem' }}>
+                        {filteredFanTakeaways.map((line) => (
+                          <li key={line} className="explanation-item">{line}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )
+              })()}
+              {darkScoreError && (
+                <div className="error-alert" style={{ marginTop: '0.75rem' }}>⚠ DarkScore: {darkScoreError}</div>
+              )}
+
               {/* Probability bars */}
               <div className="probs-card">
                 <div className="probs-title">Win / Draw / Loss Breakdown</div>
@@ -925,97 +1044,15 @@ function MatchupPage() {
               </div>
 
               {/* Explanation */}
-              {result.explanation?.length > 0 && (
+              {result.explanation?.filter((line) => !shouldHideExplanationLine(line)).length > 0 && (
                 <div className="explanation-card">
                   <div className="explanation-title">Why This Prediction</div>
                   <ul className="explanation-list">
-                    {result.explanation.map((line) => (
+                    {result.explanation.filter((line) => !shouldHideExplanationLine(line)).map((line) => (
                       <li key={line} className="explanation-item">{line}</li>
                     ))}
                   </ul>
                 </div>
-              )}
-
-              {/* DarkScore Card */}
-              {darkScoreResult && (() => {
-                const ds = darkScoreResult
-                const score = ds.dark_score
-                const tier = getDarkScoreTier(score)
-                const scoreColor = tier.color
-                const totalElo = (ds.elo_home_pre || 0) + (ds.elo_away_pre || 0)
-                const homePct = totalElo > 0 ? Math.round((ds.elo_home_pre / totalElo) * 100) : 50
-                const fanTakeaways = Array.isArray(ds.fan_takeaways) && ds.fan_takeaways.length > 0
-                  ? ds.fan_takeaways
-                  : (Array.isArray(ds.explanations) ? ds.explanations : [])
-                const darkKnight = ds.dark_knight
-                return (
-                  <div className="darkscore-card">
-                    <div className="darkscore-header">
-                      <span className="darkscore-label">DarkScore — ML Upset Model</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {ds.alert && <span className="darkscore-alert-badge">⚡ UPSET ALERT</span>}
-                        <span className="darkscore-tier-badge" style={{ color: tier.color }}>{ds.risk_band || tier.label}</span>
-                      </div>
-                    </div>
-
-                    <div className="darkscore-main">
-                      <div className="darkscore-number-wrap">
-                        <span className="darkscore-number" style={{ fontSize: '4rem', color: scoreColor }}>{score}</span>
-                        <span className="darkscore-of">/100</span>
-                      </div>
-                      <div className="darkscore-teams">
-                        <div className="darkscore-team-row">Favorite: <strong>{ds.favorite_by_elo}</strong></div>
-                        <div className="darkscore-team-row">Underdog: <strong>{ds.underdog_by_elo}</strong></div>
-                        <div className="darkscore-team-row" style={{ marginTop: '0.2rem' }}>
-                          Upset probability: <strong style={{ color: scoreColor }}>{Math.round(ds.p_final * 100)}%</strong>
-                        </div>
-                        <div className="darkscore-team-row">
-                          Match impact: <strong>{ds.impact_level || 'Volatile'}</strong>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="elo-bar-section">
-                      <div className="elo-bar-labels">
-                        <span>{ds.home_team} Elo {Math.round(ds.elo_home_pre)}</span>
-                        <span>{ds.away_team} Elo {Math.round(ds.elo_away_pre)}</span>
-                      </div>
-                      <div className="elo-bar-track">
-                        <div style={{ width: `${homePct}%`, height: '100%', background: 'linear-gradient(90deg, #1a4fff, #2563ff)', borderRadius: '100px 0 0 100px' }} />
-                        <div style={{ width: `${100 - homePct}%`, height: '100%', background: 'linear-gradient(90deg, #e84a4a, #ff6060)', borderRadius: '0 100px 100px 0' }} />
-                      </div>
-                    </div>
-
-                    <div className="darkscore-insight">
-                      <div className="darkscore-insight-title">What This Means</div>
-                      <div className="darkscore-insight-summary">
-                        {ds.fan_summary || 'Model summary unavailable for this matchup.'}
-                      </div>
-                    </div>
-
-                    {darkKnight && (
-                      <div className="dark-knight-card">
-                        <div className="dark-knight-label">Dark Knight</div>
-                        <div className="dark-knight-player">{darkKnight.player_name || 'Data missing'}</div>
-                        <div className="dark-knight-meta">
-                          {(darkKnight.team || 'Data missing')} · {(darkKnight.position || 'Data missing')} · SKILL {(darkKnight.skill_score ?? 'Data missing')}
-                        </div>
-                        <div className="dark-knight-reason">{darkKnight.reason || 'No player-impact summary available.'}</div>
-                      </div>
-                    )}
-
-                    {fanTakeaways.length > 0 && (
-                      <ul className="explanation-list" style={{ marginTop: '0.5rem' }}>
-                        {fanTakeaways.map((line) => (
-                          <li key={line} className="explanation-item">{line}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )
-              })()}
-              {darkScoreError && (
-                <div className="error-alert" style={{ marginTop: '0.75rem' }}>⚠ DarkScore: {darkScoreError}</div>
               )}
             </div>
           )}
@@ -1038,21 +1075,33 @@ function MatchupPage() {
                         <th>Favorite</th>
                         <th>DarkScore</th>
                         <th>Upset %</th>
-                        <th>Alert</th>
+                        <th>High Range</th>
+                        <th>Insight</th>
                       </tr>
                     </thead>
                     <tbody>
                       {demoPredictions.map((row, i) => {
                         const score = row.dark_score
-                        const scoreColor = score >= 60 ? 'var(--accent)' : score >= 40 ? '#f0a500' : '#4a8fff'
+                        const scoreColor = score >= 90 ? 'var(--accent)' : score <= 15 ? '#4a8fff' : '#f0a500'
+                        const focusPlayers = Array.isArray(row.focus_players) ? row.focus_players : []
                         return (
                           <tr key={i}>
                             <td>{row.home_team}</td>
                             <td>{row.away_team}</td>
                             <td style={{ color: 'var(--muted)' }}>{row.favorite_by_elo}</td>
-                            <td style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: scoreColor }}>{score}</td>
+                            <td style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: scoreColor }}>{formatDarkScore(score)}</td>
                             <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>{Math.round(row.p_final * 100)}%</td>
-                            <td>{row.alert ? <span className="demo-alert-yes">YES</span> : <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>—</span>}</td>
+                            <td>{row.alert ? <span className="demo-alert-yes">HIGH</span> : <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>—</span>}</td>
+                            <td style={{ minWidth: '320px' }}>
+                              <div style={{ color: 'var(--text)', fontSize: '0.76rem', lineHeight: 1.4 }}>
+                                {row.description || 'Model context unavailable for this matchup.'}
+                              </div>
+                              {focusPlayers.length > 0 && (
+                                <div style={{ marginTop: '0.2rem', color: 'var(--muted)', fontSize: '0.7rem' }}>
+                                  Focus: {focusPlayers.join(', ')}
+                                </div>
+                              )}
+                            </td>
                           </tr>
                         )
                       })}

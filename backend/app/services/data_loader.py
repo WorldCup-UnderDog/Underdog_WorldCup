@@ -131,17 +131,26 @@ def _normalize_team_key(value: str) -> str:
     return normalize_text(text)
 
 
-def _load_teams_elo() -> tuple[dict[str, float], str]:
-    csv_path = _resolve_elo_file()
+def _team_lookup() -> dict[str, str]:
     team_by_key = {_normalize_team_key(team): team for team in TEAM_TO_CODE}
     team_by_key.update(
         {
             _normalize_team_key("Côte d’Ivoire"): "Ivory Coast",
             _normalize_team_key("Cote d'Ivoire"): "Ivory Coast",
+            _normalize_team_key("Cote dIvoire"): "Ivory Coast",
             _normalize_team_key("Ivory_Coast"): "Ivory Coast",
             _normalize_team_key("Cape_Verde"): "Cape Verde",
+            _normalize_team_key("Curacao"): "Curaçao",
+            _normalize_team_key("Korea Republic"): "South Korea",
+            _normalize_team_key("USA"): "United States",
         }
     )
+    return team_by_key
+
+
+def _load_teams_elo() -> tuple[dict[str, float], str]:
+    csv_path = _resolve_elo_file()
+    team_by_key = _team_lookup()
 
     latest_by_team: dict[str, tuple[datetime | None, float]] = {}
     with csv_path.open(newline="", encoding="utf-8") as handle:
@@ -183,15 +192,13 @@ def _load_teams_elo() -> tuple[dict[str, float], str]:
 def _load_team_strength_from_fc26() -> dict[str, float]:
     csv_path = _resolve_data_file("fc26_combined.csv")
     by_team: dict[str, list[float]] = {team: [] for team in TEAM_TO_CODE}
+    team_by_key = _team_lookup()
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
-            nation_key = normalize_text(row.get("nation", ""))
-            matched_team = next(
-                (team for team in TEAM_TO_CODE if normalize_text(team) == nation_key),
-                None,
-            )
+            nation_key = _normalize_team_key(row.get("nation", ""))
+            matched_team = team_by_key.get(nation_key)
             if not matched_team:
                 continue
             overall = _to_float(row.get("overall_rating"), fallback=-1)

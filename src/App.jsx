@@ -9,6 +9,7 @@ import MatchupPage from './pages/MatchupPage'
 import ProfilePage from './pages/ProfilePage'
 import TeamRosterPage from './pages/TeamRosterPage'
 import TeamRosterDetailPage from './pages/TeamRosterDetailPage'
+import DarkScoreFaqPage from './pages/DarkScoreFaqPage'
 import { ROUTES, getTeamFromRosterPath } from './routes'
 
 function AuthPage({ mode }) {
@@ -249,6 +250,10 @@ function App() {
 
   if (path === ROUTES.MATCHUP) {
     return <MatchupPage />
+  }
+
+  if (path === ROUTES.DARKSCORE_FAQ) {
+    return <DarkScoreFaqPage />
   }
 
   if (path === ROUTES.ROSTERS) {

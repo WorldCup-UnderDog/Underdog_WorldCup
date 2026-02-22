@@ -5,6 +5,7 @@ export const ROUTES = {
   APP: '/app',
   PROFILE: '/app/profile',
   MATCHUP: '/app/matchup',
+  DARKSCORE_FAQ: '/app/darkscore-faq',
   ROSTERS: '/app/rosters',
 }
 

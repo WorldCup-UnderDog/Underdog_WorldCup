@@ -238,6 +238,10 @@
   animation-delay: 0.22s;
 }
 
+.dashboard-delay-3 {
+  animation-delay: 0.32s;
+}
+
 .dashboard-welcome-title {
   margin: 0.45rem 0 0;
   font-family: 'Barlow Condensed', 'Bebas Neue', sans-serif;

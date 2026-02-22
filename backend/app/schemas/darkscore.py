@@ -37,7 +37,7 @@ class DarkScoreResponse(BaseModel):
     p_model: float
     p_model_raw: float
     p_final: float
-    dark_score: int = Field(..., ge=0, le=100)
+    dark_score: float = Field(..., ge=0, le=100)
     alert: bool
     fc_adjustment: FCDetails
     explanations: list[str]
@@ -45,7 +45,10 @@ class DarkScoreResponse(BaseModel):
     impact_level: str
     fan_summary: str
     fan_takeaways: list[str]
+    dark_knight_rule: str
+    dark_knight_team: str
     dark_knight: DarkKnight
+    dark_knights: list[DarkKnight]
 
 
 class EloCompareRequest(BaseModel):
@@ -70,13 +73,15 @@ class DemoPredictionRow(BaseModel):
     favorite_by_elo: str
     underdog_by_elo: str
     p_final: float
-    dark_score: int
+    dark_score: float
     alert: bool
     fc_used: bool
     external_elo_home: float | None = None
     external_elo_away: float | None = None
     external_p_home_win: float | None = None
     external_p_away_win: float | None = None
+    description: str | None = None
+    focus_players: list[str] = Field(default_factory=list)
 
 
 class DemoPredictionsResponse(BaseModel):

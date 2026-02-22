@@ -52,15 +52,17 @@ class PredictionService:
         predicted_winner = team_a if pct_a >= pct_b else team_b
         confidence = self._confidence_label(pct_a, pct_b, pct_draw)
         upset_score = self._upset_score(pct_a, pct_b)
-        if probability_source == self.dataset.source_file:
-            method_line = "Win likelihood is estimated from team Elo rating differentials."
-        elif probability_source == self.dataset.fallback_source_file:
-            method_line = "Win likelihood falls back to calibrated matchup matrix probabilities."
-        else:
-            method_line = "Win likelihood falls back to FC26 team-strength priors."
+        favorite_team, underdog_team = self._favorite_and_underdog(team_a, team_b, pct_a, pct_b)
+        elo_gap = self._elo_gap(team_a, team_b)
+        base_line, method_line = self._base_probability_lines(
+            probability_source=probability_source,
+            favorite_team=favorite_team,
+            underdog_team=underdog_team,
+            elo_gap=elo_gap,
+        )
 
         explanation = [
-            f"Base probabilities come from {probability_source}.",
+            base_line,
             method_line,
             f"{'Neutral venue keeps baseline balance.' if payload.neutral_site else f'{team_a} receives a small home advantage boost.'}",
             f"Draw probability is adjusted by matchup parity (current draw estimate: {pct_draw}%).",
@@ -144,6 +146,49 @@ class PredictionService:
         prob_a = 1.0 / (1.0 + math.exp(-diff / 4.5))
         prob_b = 1.0 - prob_a
         return prob_a, prob_b, "fc26_combined.csv team-strength fallback"
+
+    def _base_probability_lines(
+        self,
+        *,
+        probability_source: str,
+        favorite_team: str,
+        underdog_team: str,
+        elo_gap: float | None,
+    ) -> tuple[str, str]:
+        if probability_source == self.dataset.source_file:
+            if elo_gap is None:
+                base_line = "Base probabilities follow an Elo matchup template using current team rating levels."
+            else:
+                base_line = (
+                    f"Base probabilities follow an Elo matchup template; {favorite_team} hold roughly a "
+                    f"{round(elo_gap)}-point rating edge over {underdog_team}."
+                )
+            return (
+                base_line,
+                "Win likelihood increases as the Elo differential widens in favor of one side.",
+            )
+        if probability_source == self.dataset.fallback_source_file:
+            return (
+                "Base probabilities use a calibrated matchup template when Elo coverage is missing.",
+                "Win likelihood is inferred from historical pair-level tendencies in the matchup matrix.",
+            )
+        return (
+            "Base probabilities use a squad-strength template built from FC26 ratings.",
+            "Win likelihood is inferred from relative team strength when direct matchup priors are unavailable.",
+        )
+
+    @staticmethod
+    def _favorite_and_underdog(team_a: str, team_b: str, prob_a_pct: int, prob_b_pct: int) -> tuple[str, str]:
+        favorite_team = team_a if prob_a_pct >= prob_b_pct else team_b
+        underdog_team = team_b if favorite_team == team_a else team_a
+        return favorite_team, underdog_team
+
+    def _elo_gap(self, team_a: str, team_b: str) -> float | None:
+        elo_a = self.dataset.team_elo.get(team_a)
+        elo_b = self.dataset.team_elo.get(team_b)
+        if elo_a is None or elo_b is None:
+            return None
+        return abs(elo_a - elo_b)
 
     def _apply_home_adjustment(self, prob_a: float, prob_b: float, neutral_site: bool) -> tuple[float, float]:
         if neutral_site:

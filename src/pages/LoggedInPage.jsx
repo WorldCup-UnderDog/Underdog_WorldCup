@@ -115,6 +115,14 @@ export default function Dashboard() {
         href: ROUTES.MATCHUP,
       },
       {
+        id: 'darkscore',
+        title: 'DarkScore — Upset Model',
+        description: 'ML-powered upset probability using XGBoost, Elo ratings, and FC player data.',
+        linkLabel: 'Open DarkScore FAQ',
+        icon: '🎯',
+        href: ROUTES.DARKSCORE_FAQ,
+      },
+      {
         id: 'roster',
         title: 'Team Roster Overview',
         description: 'Browse all world cup teams in a static roster list.',
@@ -202,7 +210,7 @@ export default function Dashboard() {
                 onClick={() => handleFeatureClick(feature)}
                 isHovered={hoveredCard === feature.id}
                 onHoverChange={(isOn) => setHoveredCard(isOn ? feature.id : '')}
-                animationClass={index === 0 ? ' dashboard-delay-1' : ' dashboard-delay-2'}
+                animationClass={` dashboard-delay-${Math.min(index + 1, 3)}`}
               />
             ))}
           </section>
