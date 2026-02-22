@@ -1,0 +1,823 @@
+{
+  "feature_columns": [
+    "elo_diff",
+    "points_last5_diff",
+    "gd_last5_diff",
+    "rest_days_diff",
+    "is_group_stage",
+    "is_knockout"
+  ],
+  "fit_medians": {
+    "elo_diff": 14.750101403109966,
+    "points_last5_diff": 1.0,
+    "gd_last5_diff": 1.0,
+    "rest_days_diff": 0.0,
+    "is_group_stage": 1.0,
+    "is_knockout": 0.0
+  },
+  "use_goals_features": 0,
+  "alert_threshold": 0.6,
+  "w_player": 1.2,
+  "w_team": 0.4,
+  "star_sigma": 4.0,
+  "team_sigma": 3.0,
+  "z_clip": 2.0,
+  "delta_logit_cap": 1.0,
+  "last_elo_end": {
+    "france": 1662.1380621089368,
+    "mexico": 1475.3535651032278,
+    "united_states": 1671.7169076368568,
+    "belgium": 1555.3865735252498,
+    "yugoslavia": 1533.4416833938142,
+    "brazil": 1664.904681668922,
+    "romania": 1515.1650348947742,
+    "peru": 1470.0073248797119,
+    "argentina": 1584.9207011288602,
+    "chile": 1497.211320967708,
+    "bolivia": 1454.4854923806972,
+    "paraguay": 1485.4360643227317,
+    "uruguay": 1527.0661905110965,
+    "austria": 1499.8982666107458,
+    "czechoslovakia": 1490.7872456876516,
+    "germany": 1675.0904764808174,
+    "hungary": 1494.8051391252945,
+    "egypt": 1453.0431880183319,
+    "italy": 1606.6297019598799,
+    "spain": 1554.6744006692934,
+    "sweden": 1603.141780221628,
+    "switzerland": 1474.7569148593316,
+    "netherlands": 1657.5797602330545,
+    "cuba": 1499.1916460953914,
+    "dutch_east_indies": 1489.999761626978,
+    "norway": 1571.9989881264164,
+    "poland": 1512.735920880118,
+    "england": 1613.8752132797556,
+    "scotland": 1447.1928877775963,
+    "south_korea": 1412.3395094099521,
+    "west_germany": 1628.7316671651322,
+    "turkey": 1518.9447096342558,
+    "northern_ireland": 1485.124365108797,
+    "wales": 1488.3040827140305,
+    "soviet_union": 1536.497830180492,
+    "colombia": 1502.2066999058736,
+    "bulgaria": 1429.7166858656306,
+    "north_korea": 1440.5587040942426,
+    "portugal": 1540.266659993899,
+    "israel": 1493.6129463387676,
+    "el_salvador": 1442.0690879209694,
+    "morocco": 1478.9354565687713,
+    "east_germany": 1505.3851624293088,
+    "australia": 1474.9002791236944,
+    "zaire": 1473.9293609079575,
+    "haiti": 1472.5756195842564,
+    "tunisia": 1452.245031288905,
+    "iran": 1449.6905202911953,
+    "cameroon": 1445.0395527108283,
+    "new_zealand": 1399.7384657349537,
+    "algeria": 1475.3790223185556,
+    "honduras": 1444.9632266302763,
+    "kuwait": 1480.3580307128088,
+    "canada": 1439.6768100857557,
+    "iraq": 1467.0260133738852,
+    "denmark": 1467.4556560204735,
+    "united_arab_emirates": 1473.216877281574,
+    "costa_rica": 1487.1911966438688,
+    "republic_of_ireland": 1501.5644572529038,
+    "china": 1525.5563398777165,
+    "nigeria": 1403.1043922507997,
+    "japan": 1530.8928013829025,
+    "chinese_taipei": 1484.544346946753,
+    "russia": 1487.0861701306312,
+    "saudi_arabia": 1430.737729655608,
+    "greece": 1464.0990949337001,
+    "south_africa": 1472.5680146193747,
+    "jamaica": 1469.2605385749177,
+    "croatia": 1544.3946610489702,
+    "ghana": 1460.280901895435,
+    "senegal": 1516.4508953071909,
+    "slovenia": 1477.4725674098256,
+    "ecuador": 1476.5372795200744,
+    "trinidad_and_tobago": 1483.311038254852,
+    "ivory_coast": 1466.0570920630055,
+    "serbia_and_montenegro": 1473.1829352780248,
+    "angola": 1489.2434598923383,
+    "czech_republic": 1494.4206397930639,
+    "togo": 1469.3650399286932,
+    "ukraine": 1501.3073936662338,
+    "serbia": 1469.8713540575425,
+    "slovakia": 1493.8514474828523,
+    "equatorial_guinea": 1477.003441173225,
+    "bosnia_and_herzegovina": 1488.754427725337,
+    "thailand": 1473.8140298102956,
+    "iceland": 1480.6979035547893,
+    "panama": 1471.8486806465462,
+    "qatar": 1474.006801652415
+  },
+  "last_team_state": {
+    "algeria": {
+      "points_last5": 4.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1475.3790223185556
+    },
+    "angola": {
+      "points_last5": 2.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1489.2434598923383
+    },
+    "argentina": {
+      "points_last5": 11.0,
+      "gd_last5": 6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1584.9207011288602
+    },
+    "australia": {
+      "points_last5": 7.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1474.9002791236944
+    },
+    "austria": {
+      "points_last5": 5.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1499.8982666107458
+    },
+    "belgium": {
+      "points_last5": 7.0,
+      "gd_last5": 0.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1555.3865735252498
+    },
+    "bolivia": {
+      "points_last5": 1.0,
+      "gd_last5": -15.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1454.4854923806972
+    },
+    "bosnia_and_herzegovina": {
+      "points_last5": 3.0,
+      "gd_last5": 0.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1488.754427725337
+    },
+    "brazil": {
+      "points_last5": 10.0,
+      "gd_last5": 5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1664.904681668922
+    },
+    "bulgaria": {
+      "points_last5": 1.0,
+      "gd_last5": -11.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1429.7166858656306
+    },
+    "cameroon": {
+      "points_last5": 7.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1445.0395527108283
+    },
+    "canada": {
+      "points_last5": 0.0,
+      "gd_last5": -7.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1439.6768100857557
+    },
+    "chile": {
+      "points_last5": 4.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1497.211320967708
+    },
+    "china": {
+      "points_last5": 4.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1525.5563398777165
+    },
+    "chinese_taipei": {
+      "points_last5": 3.0,
+      "gd_last5": -13.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1484.544346946753
+    },
+    "colombia": {
+      "points_last5": 7.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1502.2066999058736
+    },
+    "costa_rica": {
+      "points_last5": 4.0,
+      "gd_last5": -10.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1487.1911966438688
+    },
+    "croatia": {
+      "points_last5": 6.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1544.3946610489702
+    },
+    "cuba": {
+      "points_last5": 4.0,
+      "gd_last5": -7.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1499.1916460953914
+    },
+    "czech_republic": {
+      "points_last5": 3.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1494.4206397930639
+    },
+    "czechoslovakia": {
+      "points_last5": 9.0,
+      "gd_last5": 5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1490.7872456876516
+    },
+    "denmark": {
+      "points_last5": 3.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1467.4556560204735
+    },
+    "dutch_east_indies": {
+      "points_last5": 0.0,
+      "gd_last5": -6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1489.999761626978
+    },
+    "east_germany": {
+      "points_last5": 5.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1505.3851624293088
+    },
+    "ecuador": {
+      "points_last5": 4.0,
+      "gd_last5": -9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1476.5372795200744
+    },
+    "egypt": {
+      "points_last5": 1.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1453.0431880183319
+    },
+    "el_salvador": {
+      "points_last5": 0.0,
+      "gd_last5": -18.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1442.0690879209694
+    },
+    "england": {
+      "points_last5": 10.0,
+      "gd_last5": 9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1613.8752132797556
+    },
+    "equatorial_guinea": {
+      "points_last5": 0.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1477.003441173225
+    },
+    "france": {
+      "points_last5": 10.0,
+      "gd_last5": 4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1662.1380621089368
+    },
+    "germany": {
+      "points_last5": 7.0,
+      "gd_last5": 3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1675.0904764808174
+    },
+    "ghana": {
+      "points_last5": 4.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1460.280901895435
+    },
+    "greece": {
+      "points_last5": 5.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1464.0990949337001
+    },
+    "haiti": {
+      "points_last5": 0.0,
+      "gd_last5": -12.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1472.5756195842564
+    },
+    "honduras": {
+      "points_last5": 1.0,
+      "gd_last5": -9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1444.9632266302763
+    },
+    "hungary": {
+      "points_last5": 4.0,
+      "gd_last5": -10.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1494.8051391252945
+    },
+    "iceland": {
+      "points_last5": 1.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1480.6979035547893
+    },
+    "iran": {
+      "points_last5": 4.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1449.6905202911953
+    },
+    "iraq": {
+      "points_last5": 0.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1467.0260133738852
+    },
+    "israel": {
+      "points_last5": 2.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1493.6129463387676
+    },
+    "italy": {
+      "points_last5": 9.0,
+      "gd_last5": 5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1606.6297019598799
+    },
+    "ivory_coast": {
+      "points_last5": 0.0,
+      "gd_last5": -15.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1466.0570920630055
+    },
+    "jamaica": {
+      "points_last5": 3.0,
+      "gd_last5": -15.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1469.2605385749177
+    },
+    "japan": {
+      "points_last5": 7.0,
+      "gd_last5": 0.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1530.8928013829025
+    },
+    "kuwait": {
+      "points_last5": 1.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1480.3580307128088
+    },
+    "mexico": {
+      "points_last5": 4.0,
+      "gd_last5": -6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1475.3535651032278
+    },
+    "morocco": {
+      "points_last5": 7.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1478.9354565687713
+    },
+    "netherlands": {
+      "points_last5": 11.0,
+      "gd_last5": 6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1657.5797602330545
+    },
+    "new_zealand": {
+      "points_last5": 2.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1399.7384657349537
+    },
+    "nigeria": {
+      "points_last5": 3.0,
+      "gd_last5": -6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1403.1043922507997
+    },
+    "north_korea": {
+      "points_last5": 1.0,
+      "gd_last5": -13.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1440.5587040942426
+    },
+    "northern_ireland": {
+      "points_last5": 2.0,
+      "gd_last5": -7.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1485.124365108797
+    },
+    "norway": {
+      "points_last5": 7.0,
+      "gd_last5": 0.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1571.9989881264164
+    },
+    "panama": {
+      "points_last5": 0.0,
+      "gd_last5": -9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1471.8486806465462
+    },
+    "paraguay": {
+      "points_last5": 6.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1485.4360643227317
+    },
+    "peru": {
+      "points_last5": 4.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1470.0073248797119
+    },
+    "poland": {
+      "points_last5": 7.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1512.735920880118
+    },
+    "portugal": {
+      "points_last5": 9.0,
+      "gd_last5": 6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1540.266659993899
+    },
+    "qatar": {
+      "points_last5": 0.0,
+      "gd_last5": -6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1474.006801652415
+    },
+    "republic_of_ireland": {
+      "points_last5": 6.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1501.5644572529038
+    },
+    "romania": {
+      "points_last5": 8.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1515.1650348947742
+    },
+    "russia": {
+      "points_last5": 8.0,
+      "gd_last5": 4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1487.0861701306312
+    },
+    "saudi_arabia": {
+      "points_last5": 6.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1430.737729655608
+    },
+    "scotland": {
+      "points_last5": 2.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1447.1928877775963
+    },
+    "senegal": {
+      "points_last5": 6.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1516.4508953071909
+    },
+    "serbia": {
+      "points_last5": 1.0,
+      "gd_last5": -6.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1469.8713540575425
+    },
+    "serbia_and_montenegro": {
+      "points_last5": 0.0,
+      "gd_last5": -8.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1473.1829352780248
+    },
+    "slovakia": {
+      "points_last5": 4.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1493.8514474828523
+    },
+    "slovenia": {
+      "points_last5": 4.0,
+      "gd_last5": -3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1477.4725674098256
+    },
+    "south_africa": {
+      "points_last5": 3.0,
+      "gd_last5": -9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1472.5680146193747
+    },
+    "south_korea": {
+      "points_last5": 4.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1412.3395094099521
+    },
+    "soviet_union": {
+      "points_last5": 6.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1536.497830180492
+    },
+    "spain": {
+      "points_last5": 5.0,
+      "gd_last5": 5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1554.6744006692934
+    },
+    "sweden": {
+      "points_last5": 9.0,
+      "gd_last5": 0.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1603.141780221628
+    },
+    "switzerland": {
+      "points_last5": 6.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1474.7569148593316
+    },
+    "thailand": {
+      "points_last5": 3.0,
+      "gd_last5": -22.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1473.8140298102956
+    },
+    "togo": {
+      "points_last5": 0.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1469.3650399286932
+    },
+    "trinidad_and_tobago": {
+      "points_last5": 1.0,
+      "gd_last5": -4.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1483.311038254852
+    },
+    "tunisia": {
+      "points_last5": 7.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1452.245031288905
+    },
+    "turkey": {
+      "points_last5": 12.0,
+      "gd_last5": 5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1518.9447096342558
+    },
+    "ukraine": {
+      "points_last5": 7.0,
+      "gd_last5": -2.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1501.3073936662338
+    },
+    "united_arab_emirates": {
+      "points_last5": 0.0,
+      "gd_last5": -9.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1473.216877281574
+    },
+    "united_states": {
+      "points_last5": 8.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1671.7169076368568
+    },
+    "uruguay": {
+      "points_last5": 7.0,
+      "gd_last5": -1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1527.0661905110965
+    },
+    "wales": {
+      "points_last5": 4.0,
+      "gd_last5": -5.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1488.3040827140305
+    },
+    "west_germany": {
+      "points_last5": 11.0,
+      "gd_last5": 3.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1628.7316671651322
+    },
+    "yugoslavia": {
+      "points_last5": 8.0,
+      "gd_last5": 1.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1533.4416833938142
+    },
+    "zaire": {
+      "points_last5": 0.0,
+      "gd_last5": -14.0,
+      "concede_first_rate": 0.0,
+      "points_after_concede_first": 1.0,
+      "late_concede_rate_75p": 0.0,
+      "elo_last": 1473.9293609079575
+    }
+  },
+  "valid_start_date": "2022-01-01"
+}

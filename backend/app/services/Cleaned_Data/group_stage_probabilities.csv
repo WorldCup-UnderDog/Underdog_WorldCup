@@ -1,0 +1,49 @@
+team,prob_first,prob_top2,group
+Mexico,0.4554,0.7344,A
+South Africa,0.0872,0.2636,A
+South Korea,0.234,0.5108,A
+UEFA_Playoff_D,0.2234,0.49119999999999997,A
+Canada,0.2778,0.588,B
+Switzerland,0.4362,0.73,B
+Qatar,0.0612,0.1986,B
+UEFA_Playoff_A,0.2248,0.4834,B
+Brazil,0.7494,0.9416,C
+Morocco,0.172,0.653,C
+Scotland,0.0728,0.35760000000000003,C
+Haiti,0.0058,0.0478,C
+United States,0.4408,0.7076,D
+Paraguay,0.1446,0.36860000000000004,D
+Australia,0.1828,0.4304,D
+UEFA_Playoff_C,0.2318,0.4934,D
+Germany,0.7066,0.9084,E
+Côte d’Ivoire,0.1286,0.4724,E
+Ecuador,0.1438,0.4968,E
+Curaçao,0.021,0.12240000000000001,E
+Netherlands,0.433,0.7214,F
+Japan,0.26,0.5492,F
+Tunisia,0.0828,0.24559999999999998,F
+UEFA_Playoff_B,0.2242,0.4838,F
+Belgium,0.623,0.8504,G
+Egypt,0.189,0.5144,G
+Iran,0.1248,0.381,G
+New Zealand,0.0632,0.2542,G
+Spain,0.5972,0.8864,H
+Uruguay,0.299,0.7142,H
+Saudi Arabia,0.085,0.3036,H
+Cape_Verde,0.0188,0.0958,H
+France,0.5116,0.7838,I
+Senegal,0.1804,0.453,I
+Norway,0.0868,0.2744,I
+Interconf_Playoff_2,0.2212,0.4888,I
+Argentina,0.7382,0.9363999999999999,J
+Austria,0.1872,0.661,J
+Algeria,0.0616,0.3052,J
+Jordan,0.013,0.0974,J
+Portugal,0.5176,0.8013999999999999,K
+Colombia,0.2264,0.5542,K
+Uzbekistan,0.0426,0.16,K
+Interconf_Playoff_1,0.2134,0.48440000000000005,K
+England,0.4844,0.7732,L
+Croatia,0.2434,0.5592,L
+Ghana,0.054,0.1852,L
+Panama,0.2182,0.4824,L
