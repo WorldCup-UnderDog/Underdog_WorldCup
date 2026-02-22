@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseClient } from '../lib/supabase'
 import { ROUTES } from '../routes'
+import { fetchDarkScore, fetchDemoPredictions } from '../lib/api'
 
 const DEFAULT_TEAMS = [
   'Canada', 'Mexico', 'United States',
@@ -28,6 +29,16 @@ const FLAG_MAP = {
 }
 
 const getFlag = (team) => FLAG_MAP[team] || '🏳️'
+
+function getDarkScoreTier(score) {
+  if (score >= 60) {
+    return { label: 'UPSET ALERT', color: 'var(--accent)' }
+  }
+  if (score >= 40) {
+    return { label: 'WATCHLIST', color: '#f0a500' }
+  }
+  return { label: 'LOW UPSET RISK', color: '#4a8fff' }
+}
 
 function UpsetMeter({ score }) {
   const pct = Math.min(Math.max(score, 0), 100)
@@ -168,10 +179,18 @@ function MatchupPage() {
   const [teamB, setTeamB] = useState('Morocco')
   const [neutralSite, setNeutralSite] = useState(true)
 
+  const [stageName, setStageName] = useState('group stage')
+
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [hasRun, setHasRun] = useState(false)
+
+  const [darkScoreResult, setDarkScoreResult] = useState(null)
+  const [darkScoreError, setDarkScoreError] = useState('')
+
+  const [demoPredictions, setDemoPredictions] = useState([])
+  const [demoOpen, setDemoOpen] = useState(false)
 
   const apiBaseUrl = useMemo(
     () => (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, ''),
@@ -237,34 +256,55 @@ function MatchupPage() {
     return () => { mounted = false }
   }, [apiBaseUrl])
 
+  useEffect(() => {
+    let mounted = true
+    fetchDemoPredictions()
+      .then(data => { if (mounted) setDemoPredictions(data?.predictions || []) })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
   async function handlePredict(event) {
     event.preventDefault()
     setError('')
+    setDarkScoreError('')
+    setDarkScoreResult(null)
     if (loadingTeams) { setError('Still loading model-supported teams. Please wait.'); return }
     if (teamOptions.length < 2) { setError('No supported teams are available right now.'); return }
     if (teamA === teamB) { setError('Please choose two different teams.'); return }
     setSubmitting(true)
     try {
-      const response = await fetch(`${apiBaseUrl}/predict-matchup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ team_a: teamA, team_b: teamB, neutral_site: neutralSite }),
-      })
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}))
-        throw new Error(payload.detail || `Prediction request failed (${response.status})`)
+      const [matchupRes, darkRes] = await Promise.allSettled([
+        fetch(`${apiBaseUrl}/predict-matchup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ team_a: teamA, team_b: teamB, neutral_site: neutralSite }),
+        }).then(async r => {
+          if (!r.ok) {
+            const payload = await r.json().catch(() => ({}))
+            throw new Error(payload.detail || `Prediction request failed (${r.status})`)
+          }
+          return r.json()
+        }),
+        fetchDarkScore(teamA, teamB, stageName),
+      ])
+      if (matchupRes.status === 'fulfilled') {
+        setResult(matchupRes.value)
+        setHasRun(true)
+      } else {
+        setError(matchupRes.reason?.message || 'Failed to fetch prediction')
       }
-      const data = await response.json()
-      setResult(data)
-      setHasRun(true)
-    } catch (err) {
-      setError(err.message || 'Failed to fetch prediction')
+      if (darkRes.status === 'fulfilled') {
+        setDarkScoreResult(darkRes.value)
+      } else {
+        setDarkScoreError(darkRes.reason?.message || 'DarkScore unavailable')
+      }
     } finally {
       setSubmitting(false)
     }
   }
 
-  function handleSwap() { setTeamA(teamB); setTeamB(teamA); setResult(null); setHasRun(false) }
+  function handleSwap() { setTeamA(teamB); setTeamB(teamA); setResult(null); setHasRun(false); setDarkScoreResult(null) }
 
   async function handleLogout() {
     try { const supabase = getSupabaseClient(); await supabase.auth.signOut() }
@@ -554,12 +594,168 @@ function MatchupPage() {
           flex-shrink: 0; margin-top: 0.1rem;
         }
 
+        /* ── DARKSCORE CARD ── */
+        .darkscore-card {
+          background: rgba(10,22,40,0.7);
+          border: 1px solid rgba(232,200,74,0.18);
+          border-radius: 20px;
+          padding: 1.8rem 2rem;
+          margin-top: 1rem;
+          position: relative;
+          overflow: hidden;
+        }
+        .darkscore-card::before {
+          content: '';
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse at top right, rgba(232,200,74,0.06), transparent 60%);
+          pointer-events: none;
+        }
+        .darkscore-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 1.4rem;
+        }
+        .darkscore-label {
+          font-family: var(--font-mono); font-size: 0.65rem;
+          color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase;
+        }
+        .darkscore-alert-badge {
+          font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em;
+          padding: 0.25rem 0.6rem; border-radius: 100px;
+          background: rgba(232,200,74,0.15); border: 1px solid rgba(232,200,74,0.35);
+          color: var(--accent);
+        }
+        .darkscore-tier-badge {
+          font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.1em;
+          padding: 0.2rem 0.55rem; border-radius: 100px;
+          border: 1px solid currentColor;
+          text-transform: uppercase;
+        }
+        .darkscore-main {
+          display: flex; align-items: flex-end; gap: 2rem;
+          margin-bottom: 1.4rem; flex-wrap: wrap;
+        }
+        .darkscore-number-wrap { display: flex; align-items: baseline; gap: 0.3rem; }
+        .darkscore-number { font-family: var(--font-display); line-height: 1; }
+        .darkscore-of { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+        .darkscore-teams { display: flex; flex-direction: column; gap: 0.3rem; }
+        .darkscore-team-row { font-size: 0.82rem; color: var(--muted); }
+        .darkscore-team-row strong { color: var(--text); }
+        .elo-bar-section { margin-bottom: 1.2rem; }
+        .elo-bar-labels {
+          display: flex; justify-content: space-between;
+          font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted);
+          margin-bottom: 0.35rem;
+        }
+        .elo-bar-track {
+          height: 6px; background: rgba(255,255,255,0.06);
+          border-radius: 100px; overflow: hidden; display: flex;
+        }
+        .elo-bar-home { height: '100%'; background: linear-gradient(90deg, #1a4fff, #2563ff); border-radius: '100px 0 0 100px'; }
+        .elo-bar-away { height: '100%'; background: linear-gradient(90deg, #e84a4a, #ff6060); border-radius: '0 100px 100px 0'; }
+        .darkscore-insight {
+          margin-bottom: 1rem;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid var(--glass-border);
+          border-radius: 12px;
+          padding: 0.9rem 1rem;
+        }
+        .darkscore-insight-title {
+          font-family: var(--font-mono); font-size: 0.58rem;
+          color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+          margin-bottom: 0.45rem;
+        }
+        .darkscore-insight-summary {
+          font-size: 0.84rem;
+          color: var(--text);
+          line-height: 1.5;
+        }
+        .dark-knight-card {
+          margin-bottom: 0.6rem;
+          border-radius: 12px;
+          border: 1px solid rgba(232,200,74,0.3);
+          background: rgba(232,200,74,0.06);
+          padding: 0.9rem 1rem;
+        }
+        .dark-knight-label {
+          font-family: var(--font-mono); font-size: 0.58rem;
+          color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
+          margin-bottom: 0.45rem;
+        }
+        .dark-knight-player {
+          font-family: var(--font-display);
+          font-size: 1.4rem;
+          letter-spacing: 0.02em;
+          color: var(--text);
+          line-height: 1;
+        }
+        .dark-knight-meta {
+          margin-top: 0.25rem;
+          font-family: var(--font-mono);
+          font-size: 0.62rem;
+          color: var(--muted);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .dark-knight-reason {
+          margin-top: 0.45rem;
+          font-size: 0.78rem;
+          color: var(--text);
+          line-height: 1.45;
+        }
+
+        /* ── DEMO SECTION ── */
+        .demo-section {
+          margin-top: 2.5rem;
+          border-top: 1px solid var(--glass-border);
+          padding-top: 1.5rem;
+        }
+        .demo-toggle {
+          display: flex; align-items: center; gap: 0.6rem; width: 100%;
+          background: none; border: none; color: var(--muted); cursor: pointer;
+          font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em;
+          text-transform: uppercase; padding: 0; margin-bottom: 0;
+        }
+        .demo-toggle:hover { color: var(--text); }
+        .demo-toggle-arrow { transition: transform 0.2s; }
+        .demo-toggle-arrow.open { transform: rotate(90deg); }
+        .demo-table-wrap {
+          margin-top: 1rem;
+          overflow-x: auto;
+          border-radius: 14px;
+          border: 1px solid var(--glass-border);
+        }
+        .demo-table {
+          width: 100%; border-collapse: collapse;
+          font-size: 0.82rem;
+        }
+        .demo-table th {
+          font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em;
+          color: var(--muted); text-transform: uppercase;
+          padding: 0.75rem 1rem; text-align: left;
+          background: rgba(10,22,40,0.8);
+          border-bottom: 1px solid var(--glass-border);
+        }
+        .demo-table td {
+          padding: 0.7rem 1rem;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          color: var(--text);
+        }
+        .demo-table tr:last-child td { border-bottom: none; }
+        .demo-table tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+        .demo-alert-yes {
+          font-family: var(--font-mono); font-size: 0.6rem;
+          color: var(--accent); background: rgba(232,200,74,0.1);
+          border: 1px solid rgba(232,200,74,0.25);
+          padding: 0.15rem 0.4rem; border-radius: 4px;
+        }
+
         @media (max-width: 640px) {
           .team-selector-row { flex-direction: column; }
           .swap-btn { width: 100%; height: 34px; }
           .teams-result-row { flex-direction: column; }
           .vs-divider { width: 100%; height: 24px; }
           .meta-row { grid-template-columns: 1fr; }
+          .darkscore-main { flex-direction: column; gap: 1rem; }
         }
       `}</style>
 
@@ -636,6 +832,23 @@ function MatchupPage() {
                       className={`venue-pill${!neutralSite ? ' active' : ''}`}
                       onClick={() => setNeutralSite(false)}
                     >🏟️ Team A Home</button>
+                  </div>
+                </div>
+
+                {/* Stage */}
+                <div className="venue-row">
+                  <span className="venue-label">Stage</span>
+                  <div className="venue-options">
+                    <button
+                      type="button"
+                      className={`venue-pill${stageName === 'group stage' ? ' active' : ''}`}
+                      onClick={() => setStageName('group stage')}
+                    >Group Stage</button>
+                    <button
+                      type="button"
+                      className={`venue-pill${stageName === 'knockout' ? ' active' : ''}`}
+                      onClick={() => setStageName('knockout')}
+                    >Knockout</button>
                   </div>
                 </div>
 
@@ -720,6 +933,131 @@ function MatchupPage() {
                       <li key={line} className="explanation-item">{line}</li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {/* DarkScore Card */}
+              {darkScoreResult && (() => {
+                const ds = darkScoreResult
+                const score = ds.dark_score
+                const tier = getDarkScoreTier(score)
+                const scoreColor = tier.color
+                const totalElo = (ds.elo_home_pre || 0) + (ds.elo_away_pre || 0)
+                const homePct = totalElo > 0 ? Math.round((ds.elo_home_pre / totalElo) * 100) : 50
+                const fanTakeaways = Array.isArray(ds.fan_takeaways) && ds.fan_takeaways.length > 0
+                  ? ds.fan_takeaways
+                  : (Array.isArray(ds.explanations) ? ds.explanations : [])
+                const darkKnight = ds.dark_knight
+                return (
+                  <div className="darkscore-card">
+                    <div className="darkscore-header">
+                      <span className="darkscore-label">DarkScore — ML Upset Model</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {ds.alert && <span className="darkscore-alert-badge">⚡ UPSET ALERT</span>}
+                        <span className="darkscore-tier-badge" style={{ color: tier.color }}>{ds.risk_band || tier.label}</span>
+                      </div>
+                    </div>
+
+                    <div className="darkscore-main">
+                      <div className="darkscore-number-wrap">
+                        <span className="darkscore-number" style={{ fontSize: '4rem', color: scoreColor }}>{score}</span>
+                        <span className="darkscore-of">/100</span>
+                      </div>
+                      <div className="darkscore-teams">
+                        <div className="darkscore-team-row">Favorite: <strong>{ds.favorite_by_elo}</strong></div>
+                        <div className="darkscore-team-row">Underdog: <strong>{ds.underdog_by_elo}</strong></div>
+                        <div className="darkscore-team-row" style={{ marginTop: '0.2rem' }}>
+                          Upset probability: <strong style={{ color: scoreColor }}>{Math.round(ds.p_final * 100)}%</strong>
+                        </div>
+                        <div className="darkscore-team-row">
+                          Match impact: <strong>{ds.impact_level || 'Volatile'}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="elo-bar-section">
+                      <div className="elo-bar-labels">
+                        <span>{ds.home_team} Elo {Math.round(ds.elo_home_pre)}</span>
+                        <span>{ds.away_team} Elo {Math.round(ds.elo_away_pre)}</span>
+                      </div>
+                      <div className="elo-bar-track">
+                        <div style={{ width: `${homePct}%`, height: '100%', background: 'linear-gradient(90deg, #1a4fff, #2563ff)', borderRadius: '100px 0 0 100px' }} />
+                        <div style={{ width: `${100 - homePct}%`, height: '100%', background: 'linear-gradient(90deg, #e84a4a, #ff6060)', borderRadius: '0 100px 100px 0' }} />
+                      </div>
+                    </div>
+
+                    <div className="darkscore-insight">
+                      <div className="darkscore-insight-title">What This Means</div>
+                      <div className="darkscore-insight-summary">
+                        {ds.fan_summary || 'Model summary unavailable for this matchup.'}
+                      </div>
+                    </div>
+
+                    {darkKnight && (
+                      <div className="dark-knight-card">
+                        <div className="dark-knight-label">Dark Knight</div>
+                        <div className="dark-knight-player">{darkKnight.player_name || 'Data missing'}</div>
+                        <div className="dark-knight-meta">
+                          {(darkKnight.team || 'Data missing')} · {(darkKnight.position || 'Data missing')} · SKILL {(darkKnight.skill_score ?? 'Data missing')}
+                        </div>
+                        <div className="dark-knight-reason">{darkKnight.reason || 'No player-impact summary available.'}</div>
+                      </div>
+                    )}
+
+                    {fanTakeaways.length > 0 && (
+                      <ul className="explanation-list" style={{ marginTop: '0.5rem' }}>
+                        {fanTakeaways.map((line) => (
+                          <li key={line} className="explanation-item">{line}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )
+              })()}
+              {darkScoreError && (
+                <div className="error-alert" style={{ marginTop: '0.75rem' }}>⚠ DarkScore: {darkScoreError}</div>
+              )}
+            </div>
+          )}
+
+          {/* Demo Predictions */}
+          {demoPredictions.length > 0 && (
+            <div className="demo-section">
+              <button type="button" className="demo-toggle" onClick={() => setDemoOpen(o => !o)}>
+                <span className={`demo-toggle-arrow${demoOpen ? ' open' : ''}`}>▶</span>
+                Demo Predictions — Top Matchups
+                <span style={{ marginLeft: 'auto', color: 'var(--accent)' }}>{demoPredictions.length} matches</span>
+              </button>
+              {demoOpen && (
+                <div className="demo-table-wrap">
+                  <table className="demo-table">
+                    <thead>
+                      <tr>
+                        <th>Home</th>
+                        <th>Away</th>
+                        <th>Favorite</th>
+                        <th>DarkScore</th>
+                        <th>Upset %</th>
+                        <th>Alert</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {demoPredictions.map((row, i) => {
+                        const score = row.dark_score
+                        const scoreColor = score >= 60 ? 'var(--accent)' : score >= 40 ? '#f0a500' : '#4a8fff'
+                        return (
+                          <tr key={i}>
+                            <td>{row.home_team}</td>
+                            <td>{row.away_team}</td>
+                            <td style={{ color: 'var(--muted)' }}>{row.favorite_by_elo}</td>
+                            <td style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: scoreColor }}>{score}</td>
+                            <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>{Math.round(row.p_final * 100)}%</td>
+                            <td>{row.alert ? <span className="demo-alert-yes">YES</span> : <span style={{ color: 'var(--muted)', fontSize: '0.75rem' }}>—</span>}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

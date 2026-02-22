@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export async function fetchMatchProbability(teamA, teamB) {
   const res = await fetch(`${BASE_URL}/predict`, {
@@ -46,4 +46,30 @@ export async function fetchPlayers(nation = null, position = null) {
 export async function fetchPlayer(name) {
   const res = await fetch(`${BASE_URL}/player/${encodeURIComponent(name)}`);
   return res.json();
+}
+
+export async function fetchDarkScore(homeTeam, awayTeam, stageName = 'group stage') {
+  const res = await fetch(`${BASE_URL}/dark-score`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ home_team: homeTeam, away_team: awayTeam, stage_name: stageName }),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function fetchDemoPredictions() {
+  const res = await fetch(`${BASE_URL}/demo-predictions`)
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function fetchEloCompare(teamA, teamB) {
+  const res = await fetch(`${BASE_URL}/elo/compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ team_a: teamA, team_b: teamB }),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
 }
