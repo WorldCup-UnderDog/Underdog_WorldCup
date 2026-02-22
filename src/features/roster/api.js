@@ -20,8 +20,8 @@ export async function fetchTeamRoster(teamName) {
       players: players.map((p, i) => ({
         number: i + 1,
         name: p.name,
+        nation: p.nation,
         position: p.best_position,
-        club: p.team_contract || 'TBD',
         overall: p.overall_rating,
         potential: p.potential,
         age: p.age,
@@ -48,7 +48,7 @@ export async function fetchTeamRoster(teamName) {
         number: i + 1,
         name: p.name,
         position: p.best_position,
-        club: p.team_contract || 'TBD',
+        overall: p.overall_rating,
       })),
     }
   } catch (err) {

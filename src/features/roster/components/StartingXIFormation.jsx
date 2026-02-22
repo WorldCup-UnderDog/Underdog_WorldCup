@@ -12,7 +12,7 @@ function getPlayerStatText(player) {
   if (Number.isFinite(stats.assists)) segments.push(`${stats.assists} assists`)
 
   if (segments.length > 0) return segments.join(' • ')
-  return player.club || ''
+  return player.overall != null ? String(player.overall) : ''
 }
 
 function renderPlayerCard(player, onPlayerClick, showStats) {

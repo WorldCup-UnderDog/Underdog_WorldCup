@@ -32,7 +32,7 @@ function buildPlayer(team, number, position) {
     number,
     name: `${team} Player ${number}`,
     position,
-    club: `Club ${((number - 1) % 6) + 1}`,
+    overall: 70 + ((number - 1) % 20),
     stats: {
       caps: 10 + (number * 2),
       goals: position === 'ST' || position === 'RW' || position === 'LW' ? Math.max(1, Math.floor(number / 3)) : 0,

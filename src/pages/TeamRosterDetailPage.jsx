@@ -6,6 +6,7 @@ import { getFlagSrc } from '../features/roster/flags'
 import { fetchTeamRoster } from '../features/roster/api'
 import StartingXIFormation from '../features/roster/components/StartingXIFormation'
 import TeamDiscussion from '../features/roster/components/TeamDiscussion'
+import PlayerProfileCard from '../features/roster/components/PlayerProfileCard'
 
 function TeamRosterDetailPage({ teamName }) {
   const [email, setEmail] = useState('')
@@ -17,7 +18,13 @@ function TeamRosterDetailPage({ teamName }) {
   const [loadingRoster, setLoadingRoster] = useState(true)
   const [rosterError, setRosterError] = useState('')
   const [teamData, setTeamData] = useState(null)
-  const [selectedPlayer, setSelectedPlayer] = useState(null)
+  const [profilePlayer, setProfilePlayer] = useState(null)
+
+  function openProfile(player) {
+    // If called from the formation (starting_xi has limited data), look up the full record
+    const full = teamData?.players.find((p) => p.name === player.name) ?? player
+    setProfilePlayer(full)
+  }
 
   const flagSrc = useMemo(() => (teamName ? getFlagSrc(teamName) : null), [teamName])
 
@@ -74,7 +81,6 @@ function TeamRosterDetailPage({ teamName }) {
         if (!payload) throw new Error('No static roster found for this team yet.')
         if (mounted) {
           setTeamData(payload)
-          setSelectedPlayer(null)
         }
       } catch (err) {
         if (mounted) setRosterError(err.message || 'Failed to load team roster')
@@ -164,20 +170,8 @@ function TeamRosterDetailPage({ teamName }) {
                     players={teamData.starting_xi || teamData.players}
                     compact={false}
                     showStats={false}
-                    onPlayerClick={setSelectedPlayer}
+                    onPlayerClick={openProfile}
                   />
-
-                  {selectedPlayer && (
-                    <div className="selected-player-card">
-                      <p className="selected-player-label">Selected Player</p>
-                      <p className="selected-player-name">
-                        #{selectedPlayer.number} {selectedPlayer.name}
-                      </p>
-                      <p className="selected-player-meta">
-                        Position: {selectedPlayer.position} | Club: {selectedPlayer.club || 'TBD'}
-                      </p>
-                    </div>
-                  )}
 
                   <div className="team-player-table-wrap">
                     <table className="team-player-table">
@@ -186,21 +180,36 @@ function TeamRosterDetailPage({ teamName }) {
                           <th>#</th>
                           <th>Player</th>
                           <th>Pos</th>
-                          <th>Club</th>
+                          <th>Overall</th>
                         </tr>
                       </thead>
                       <tbody>
                         {teamData.players.map((player) => (
                           <tr key={`${teamData.team}-${player.number}-${player.name}`}>
                             <td>{player.number}</td>
-                            <td>{player.name}</td>
+                            <td>
+                              <button
+                                type="button"
+                                className="ppc-name-btn"
+                                onClick={() => openProfile(player)}
+                              >
+                                {player.name}
+                              </button>
+                            </td>
                             <td>{player.position}</td>
-                            <td>{player.club}</td>
+                            <td>{player.overall ?? '—'}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+
+                  {profilePlayer && (
+                    <PlayerProfileCard
+                      player={profilePlayer}
+                      onClose={() => setProfilePlayer(null)}
+                    />
+                  )}
 
                   <TeamDiscussion teamName={teamName} userId={userId} username={username} />
                 </div>
