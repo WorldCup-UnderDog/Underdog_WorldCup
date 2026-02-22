@@ -6,6 +6,7 @@ import csv
 import logging
 import unicodedata
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ CODE_TO_TEAM = {value: key for key, value in TEAM_TO_CODE.items()}
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BACKEND_ROOT = REPO_ROOT / "backend"
 DATA_ROOT = BACKEND_ROOT / "data"
+SERVICE_DATA_ROOT = Path(__file__).resolve().parent / "Cleaned_Data"
 
 
 @dataclass(frozen=True)
@@ -67,7 +69,9 @@ class MatchupDataset:
     teams: list[str]
     probabilities: dict[tuple[str, str], tuple[float, float]]
     team_strength: dict[str, float]
+    team_elo: dict[str, float]
     source_file: str
+    fallback_source_file: str
 
 
 @dataclass(frozen=True)
@@ -99,6 +103,19 @@ def _resolve_data_file(name: str) -> Path:
     raise FileNotFoundError(f"Could not locate data file '{name}'. Checked: {', '.join(str(p) for p in candidates)}")
 
 
+def _resolve_elo_file() -> Path:
+    candidates = [
+        SERVICE_DATA_ROOT / "teams_elo.csv",
+        DATA_ROOT / "teams_elo.csv",
+        BACKEND_ROOT / "teams_elo.csv",
+        REPO_ROOT / "teams_elo.csv",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(f"Could not locate teams_elo.csv. Checked: {', '.join(str(p) for p in candidates)}")
+
+
 def _to_float(raw: str, fallback: float) -> float:
     text = str(raw or "").strip()
     if not text:
@@ -107,6 +124,60 @@ def _to_float(raw: str, fallback: float) -> float:
         return float(text)
     except ValueError:
         return fallback
+
+
+def _normalize_team_key(value: str) -> str:
+    text = str(value or "").replace("_", " ").replace("-", " ")
+    return normalize_text(text)
+
+
+def _load_teams_elo() -> tuple[dict[str, float], str]:
+    csv_path = _resolve_elo_file()
+    team_by_key = {_normalize_team_key(team): team for team in TEAM_TO_CODE}
+    team_by_key.update(
+        {
+            _normalize_team_key("Côte d’Ivoire"): "Ivory Coast",
+            _normalize_team_key("Cote d'Ivoire"): "Ivory Coast",
+            _normalize_team_key("Ivory_Coast"): "Ivory Coast",
+            _normalize_team_key("Cape_Verde"): "Cape Verde",
+        }
+    )
+
+    latest_by_team: dict[str, tuple[datetime | None, float]] = {}
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            team_raw = row.get("team", "")
+            canonical_team = team_by_key.get(_normalize_team_key(team_raw))
+            if not canonical_team:
+                continue
+
+            elo = _to_float(row.get("elo"), fallback=-1)
+            if elo <= 0:
+                continue
+
+            date_raw = str(row.get("date", "")).strip()
+            parsed_date = None
+            if date_raw:
+                try:
+                    parsed_date = datetime.fromisoformat(date_raw)
+                except ValueError:
+                    parsed_date = None
+
+            previous = latest_by_team.get(canonical_team)
+            if previous is None:
+                latest_by_team[canonical_team] = (parsed_date, elo)
+                continue
+
+            prev_date, _ = previous
+            if parsed_date is None:
+                continue
+            if prev_date is None or parsed_date >= prev_date:
+                latest_by_team[canonical_team] = (parsed_date, elo)
+
+    team_elo = {team: value for team, (_, value) in latest_by_team.items()}
+    logger.info("Loaded external Elo table: teams=%s source=%s", len(team_elo), csv_path.name)
+    return team_elo, csv_path.name
 
 
 def _load_team_strength_from_fc26() -> dict[str, float]:
@@ -150,6 +221,7 @@ def load_matchup_dataset() -> MatchupDataset:
     csv_path = _resolve_data_file("nation_matchup_probabilities_proxy_logreg_ALL_pairs_calibrated.csv")
     probabilities: dict[tuple[str, str], tuple[float, float]] = {}
     team_strength = _load_team_strength_from_fc26()
+    team_elo, elo_source = _load_teams_elo()
 
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
@@ -184,7 +256,9 @@ def load_matchup_dataset() -> MatchupDataset:
         teams=sorted_teams,
         probabilities=probabilities,
         team_strength=team_strength,
-        source_file=csv_path.name,
+        team_elo=team_elo,
+        source_file=elo_source,
+        fallback_source_file=csv_path.name,
     )
 
 

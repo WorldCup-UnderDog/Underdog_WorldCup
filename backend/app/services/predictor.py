@@ -35,7 +35,7 @@ class PredictionService:
         if team_a == team_b:
             raise PredictionInputError("team_a and team_b must be different.")
 
-        raw_a, raw_b = self._lookup_pair_probabilities(team_a, team_b)
+        raw_a, raw_b, probability_source = self._lookup_pair_probabilities(team_a, team_b)
         adj_a, adj_b = self._apply_home_adjustment(raw_a, raw_b, payload.neutral_site)
 
         draw_prob = self._derive_draw_probability(adj_a, adj_b, payload.neutral_site)
@@ -52,10 +52,16 @@ class PredictionService:
         predicted_winner = team_a if pct_a >= pct_b else team_b
         confidence = self._confidence_label(pct_a, pct_b, pct_draw)
         upset_score = self._upset_score(pct_a, pct_b)
+        if probability_source == self.dataset.source_file:
+            method_line = "Win likelihood is estimated from team Elo rating differentials."
+        elif probability_source == self.dataset.fallback_source_file:
+            method_line = "Win likelihood falls back to calibrated matchup matrix probabilities."
+        else:
+            method_line = "Win likelihood falls back to FC26 team-strength priors."
 
         explanation = [
-            f"Base probabilities come from {self.dataset.source_file}.",
-            "Attacking/defensive quality is represented through nation-level calibrated matchup probabilities.",
+            f"Base probabilities come from {probability_source}.",
+            method_line,
             f"{'Neutral venue keeps baseline balance.' if payload.neutral_site else f'{team_a} receives a small home advantage boost.'}",
             f"Draw probability is adjusted by matchup parity (current draw estimate: {pct_draw}%).",
         ]
@@ -71,7 +77,7 @@ class PredictionService:
             confidence=confidence,
             explanation=explanation,
             neutral_site=payload.neutral_site,
-            model_source=self.dataset.source_file,
+            model_source=probability_source,
         )
 
     def scoreline_upset(self, payload: UpsetRequest) -> UpsetResponse:
@@ -115,22 +121,29 @@ class PredictionService:
                 return team
         raise PredictionInputError(f"Unsupported team: {candidate}")
 
-    def _lookup_pair_probabilities(self, team_a: str, team_b: str) -> tuple[float, float]:
+    def _lookup_pair_probabilities(self, team_a: str, team_b: str) -> tuple[float, float, str]:
+        elo_a = self.dataset.team_elo.get(team_a)
+        elo_b = self.dataset.team_elo.get(team_b)
+        if elo_a is not None and elo_b is not None:
+            prob_a = 1.0 / (1.0 + 10 ** ((elo_b - elo_a) / 400.0))
+            prob_b = 1.0 - prob_a
+            return prob_a, prob_b, self.dataset.source_file
+
         direct = self.dataset.probabilities.get((team_a, team_b))
         if direct is not None:
-            return direct
+            return direct[0], direct[1], self.dataset.fallback_source_file
 
         reversed_pair = self.dataset.probabilities.get((team_b, team_a))
         if reversed_pair is not None:
             prob_b, prob_a = reversed_pair
-            return prob_a, prob_b
+            return prob_a, prob_b, self.dataset.fallback_source_file
 
         strength_a = self.dataset.team_strength.get(team_a, 70.0)
         strength_b = self.dataset.team_strength.get(team_b, 70.0)
         diff = strength_a - strength_b
         prob_a = 1.0 / (1.0 + math.exp(-diff / 4.5))
         prob_b = 1.0 - prob_a
-        return prob_a, prob_b
+        return prob_a, prob_b, "fc26_combined.csv team-strength fallback"
 
     def _apply_home_adjustment(self, prob_a: float, prob_b: float, neutral_site: bool) -> tuple[float, float]:
         if neutral_site:

@@ -15,6 +15,7 @@ from .api.v1.router import api_router
 from .core.config import settings
 from .core.logging import configure_logging
 from .services.data_loader import load_matchup_dataset, load_player_records
+from .services.model_service import load_model_service
 from .services.player_service import PlayerService
 from .services.predictor import PredictionService
 
@@ -55,6 +56,7 @@ async def lifespan(app: FastAPI):
     player_records = load_player_records()
     app.state.prediction_service = PredictionService(dataset=matchup_dataset)
     app.state.player_service = PlayerService(players=player_records)
+    app.state.model_service = load_model_service()  # None if artifacts missing
     yield
 
 # ── App ───────────────────────────────────────────────────
