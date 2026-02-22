@@ -25,6 +25,28 @@ players_df = pd.read_csv(
 )
 players_df = players_df[players_df["name"].notna() & players_df["overall_rating"].notna()]
 
+# Fill nulls with position-group medians so stat columns never return 0 for missing data
+_POS_GROUPS = {
+    "GK":  ["GK"],
+    "DEF": ["CB", "LB", "RB", "LWB", "RWB"],
+    "MID": ["CM", "CDM", "CAM", "LM", "RM"],
+    "FWD": ["ST", "CF", "LW", "RW"],
+}
+_pos_to_group = {pos: grp for grp, positions in _POS_GROUPS.items() for pos in positions}
+_stat_cols = [
+    "acceleration", "sprint_speed", "dribbling", "finishing",
+    "short_passing", "long_passing", "reactions", "heading_accuracy",
+    "ball_control", "agility", "balance", "shot_power", "jumping",
+    "total_goalkeeping", "total_defending", "total_power",
+    "total_mentality", "total_attacking", "total_skill", "total_movement",
+]
+_stat_cols = [c for c in _stat_cols if c in players_df.columns]
+players_df["_pos_group"] = players_df["best_position"].map(_pos_to_group).fillna("MID")
+for _col in _stat_cols:
+    _group_medians = players_df.groupby("_pos_group")[_col].transform("median")
+    players_df[_col] = players_df[_col].fillna(_group_medians).fillna(players_df[_col].median())
+players_df.drop(columns=["_pos_group"], inplace=True)
+
 # ── Lifespan ─────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):

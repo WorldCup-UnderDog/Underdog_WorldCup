@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import os
 
-CSV_PATH = "/Users/arjunramakrishnan/IdeaProjects/Underdog_WorldCup/backend/data/fc26_combined.csv"  # update path if needed
+CSV_PATH = "/Users/arjunramakrishnan/IdeaProjects/Underdog_WorldCup/backend/app/services/Cleaned_Data/fc26_players_clean_filled.csv"  # update path if needed
 
 POS_GROUPS = {
     "1": ("GK",  ["GK"]),
@@ -26,6 +26,25 @@ def load_data():
         sys.exit(1)
     df = pd.read_csv(CSV_PATH)
     df = df[df["name"].notna() & df["overall_rating"].notna()]
+
+    # Fill nulls using position-group medians so every player has full stats
+    stat_cols = [
+        "acceleration", "sprint_speed", "dribbling", "finishing",
+        "short_passing", "long_passing", "reactions", "heading_accuracy",
+        "ball_control", "agility", "balance", "shot_power", "jumping",
+        "total_goalkeeping", "total_defending", "total_power",
+        "total_mentality", "total_attacking", "total_skill", "total_movement",
+    ]
+    stat_cols = [c for c in stat_cols if c in df.columns]
+
+    pos_to_group = {p: label for label, positions in POS_GROUPS.values() for p in positions}
+    df["_pos_group"] = df["best_position"].map(pos_to_group).fillna("MID")
+
+    for col in stat_cols:
+        group_medians = df.groupby("_pos_group")[col].transform("median")
+        df[col] = df[col].fillna(group_medians).fillna(df[col].median())
+
+    df.drop(columns=["_pos_group"], inplace=True)
     return df
 
 def divider(char="─", width=52):
@@ -70,11 +89,8 @@ def print_profile(row):
     nation    = str(row.get("nation", "—")).title()
     position  = row.get("best_position", "—")
 
-    playstyles = [
-        str(row.get(c, "")).strip()
-        for c in ["playstyles","playstyles2","playstyles3","playstyles4","playstyles5"]
-        if pd.notna(row.get(c)) and str(row.get(c, "")).strip()
-    ]
+    raw_ps = row.get("playstyles", "")
+    playstyles = [p.strip() for p in str(raw_ps).split(",") if pd.notna(raw_ps) and str(raw_ps).strip() and p.strip()]
 
     # ── Header ────────────────────────────────────────────
     print()
