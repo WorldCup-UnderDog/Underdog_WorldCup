@@ -125,7 +125,7 @@ function TeamRosterDetailPage({ teamName }) {
           <p className="section-label">Team Roster Detail</p>
           <h1 className="template-title">{teamName || 'Team'}</h1>
           <p className="template-subtitle">
-            Static roster data today. This page is structured for future API and team stats integration.
+            Live roster data powered by the players database.
           </p>
 
           {loadingSession && <p className="template-subtitle">Checking your session...</p>}
