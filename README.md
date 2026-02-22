@@ -87,3 +87,37 @@ Notes:
 Versioned aliases are also available under `/api/v1/*`.
 
 For backend-specific notes, see `backend/README.md`.
+
+## Data Files Used & Purpose
+
+- **matches (1).csv** — Historical World Cup match results. Used as core training data to learn upset patterns and dark scores. (https://www.kaggle.com/code/sarazahran1/world-cup-2026-match-predictor/input?select=matches.csv)
+- **teams_elo.csv** — Elo ratings for each nation. Provides team strength differentials for modeling favorites vs underdogs. (https://www.kaggle.com/code/sarazahran1/world-cup-2026-match-predictor) Used with permission by the owner of the dataset.
+- **fc26_players_clean_filled.csv** — Corrected player dataset with missing stats filled. Use this in the API. (Web Scraped from sofifa.com)
+- **wc2018_2022_upset_training_filled.csv** — Final combined historical training dataset used to train XGBoost. (Web Scraped from sofifa.com)
+- **wc2018_2022_model_matrix.csv** — Fully numeric feature matrix for model input.
+- **group_stage_probabilities.csv** — Predicted match win/upset probabilities for the 2026 group stage. Use as training data to learn about upset patterns and dark scores.
+- **group_standings (1).csv** — Simulated final group standings. Use as training data to learn about upset patterns and dark scores.
+
+## Sphinx Usage
+
+- Use Sphinx to assist with the engineering of our formula called the Darkscore, which quantifies a team’s upset potential using historical match data, Elo differentials, and FC26 team aggregate features.
+**Feature Sources:**
+- Pace / Physical / Defensive metrics → `fc26_team_aggregates.csv`
+- Potential Gap / Volatility → Player-derived aggregates
+- Elo Differential → `teams_elo.csv`
+- Historical upset calibration → `matches (1).csv`
+
+Higher DarkScore = higher upset likelihood.
+
+Additionally, Sphinx was used to generate hexagon attribute radar visualizations for individual players using six axes:
+
+- Pace  
+- Shooting  
+- Passing  
+- Dribbling  
+- Defending  
+- Physical  
+
+These radar plots provide visual comparison of player strengths and support frontend storytelling for upset candidates.
+
+
