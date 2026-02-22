@@ -35,6 +35,67 @@ const SORT_ORDER = {
   LW: 5,
 }
 
+// Line priority for sorting outfield players defender → midfielder → attacker
+const LINE_PRIORITY = { DEF: 1, MID: 2, ATT: 3 }
+
+export const TEAM_FORMATIONS = {
+  // 4-3-3
+  Spain: '4-3-3',
+  Brazil: '4-3-3',
+  Netherlands: '4-3-3',
+  Portugal: '4-3-3',
+  Morocco: '4-3-3',
+  Colombia: '4-3-3',
+  Japan: '4-3-3',
+  Ecuador: '4-3-3',
+  Norway: '4-3-3',
+  Algeria: '4-3-3',
+  Scotland: '4-3-3',
+  Tunisia: '4-3-3',
+  'Ivory Coast': '4-3-3',
+  Uzbekistan: '4-3-3',
+  'Cape Verde': '4-3-3',
+  Ghana: '4-3-3',
+  // 4-2-3-1
+  Argentina: '4-2-3-1',
+  France: '4-2-3-1',
+  England: '4-2-3-1',
+  Belgium: '4-2-3-1',
+  Germany: '4-2-3-1',
+  Croatia: '4-2-3-1',
+  Switzerland: '4-2-3-1',
+  Mexico: '4-2-3-1',
+  Senegal: '4-2-3-1',
+  Iran: '4-2-3-1',
+  'South Korea': '4-2-3-1',
+  Austria: '4-2-3-1',
+  Canada: '4-2-3-1',
+  Panama: '4-2-3-1',
+  Egypt: '4-2-3-1',
+  'South Africa': '4-2-3-1',
+  Jordan: '4-2-3-1',
+  'Saudi Arabia': '4-2-3-1',
+  'Curaçao': '4-2-3-1',
+  Haiti: '4-2-3-1',
+  'New Zealand': '4-2-3-1',
+  // 4-4-2
+  'United States': '4-4-2',
+  Uruguay: '4-4-2',
+  Australia: '4-4-2',
+  Paraguay: '4-4-2',
+  Qatar: '4-4-2',
+}
+
+function parseFormation(formation) {
+  const parts = formation.split('-').map(Number)
+  if (parts.length === 4) {
+    // e.g. 4-2-3-1 → def=4, dm=2, mid=3, att=1
+    return { def: parts[0], dm: parts[1], mid: parts[2], att: parts[3] }
+  }
+  // e.g. 4-3-3 or 4-4-2 → def=4, dm=0, mid, att
+  return { def: parts[0] ?? 4, dm: 0, mid: parts[1] ?? 3, att: parts[2] ?? 3 }
+}
+
 export function normalizePosition(position) {
   if (!position) return 'CM'
   const raw = String(position).trim().toUpperCase().replace(/\s+/g, '')
@@ -64,64 +125,56 @@ function sortLine(players) {
   })
 }
 
-export function buildStartingXIFormation(players) {
+export function buildStartingXIFormation(players, formation = '4-3-3') {
   const xi = Array.isArray(players) ? players.slice(0, 11) : []
   if (xi.length === 0) {
     return {
       formation: '0-0-0',
-      lines: { gk: [], defense: [], midfield: [], attack: [] },
+      lines: { gk: [], defense: [], dm: [], midfield: [], attack: [] },
     }
   }
 
-  let gk = null
-  const defense = []
-  const midfield = []
-  const attack = []
+  const { def: targetDef, dm: targetDm, mid: targetMid, att: targetAtt } = parseFormation(formation)
 
-  xi.forEach((player) => {
+  // Normalize positions on all players
+  const tagged = xi.map((player) => {
     const normalized_position = normalizePosition(player.position)
-    const normalizedPlayer = { ...player, normalized_position }
     const line = getLine(normalized_position)
-
-    if (line === 'GK') {
-      if (!gk) {
-        gk = normalizedPlayer
-      } else {
-        defense.push({ ...normalizedPlayer, normalized_position: 'CB' })
-      }
-      return
-    }
-
-    if (line === 'DEF') {
-      defense.push(normalizedPlayer)
-      return
-    }
-
-    if (line === 'MID') {
-      midfield.push(normalizedPlayer)
-      return
-    }
-
-    attack.push(normalizedPlayer)
+    return { ...player, normalized_position, line }
   })
 
-  if (!gk) {
-    const fallback = defense.shift() || midfield.shift() || attack.shift() || xi[0]
-    gk = { ...fallback, normalized_position: 'GK' }
+  // Extract GK
+  const gkIndex = tagged.findIndex((p) => p.line === 'GK')
+  let gk
+  if (gkIndex >= 0) {
+    ;[gk] = tagged.splice(gkIndex, 1)
+  } else {
+    gk = { ...tagged[0], normalized_position: 'GK', line: 'GK' }
+    tagged.splice(0, 1)
   }
 
-  const sortedDefense = sortLine(defense)
-  const sortedMidfield = sortLine(midfield)
-  const sortedAttack = sortLine(attack)
-  const formation = `${sortedDefense.length}-${sortedMidfield.length}-${sortedAttack.length}`
+  // Sort remaining 10 by natural line order: DEF → MID → ATT
+  tagged.sort((a, b) => {
+    const pa = LINE_PRIORITY[a.line] ?? 2
+    const pb = LINE_PRIORITY[b.line] ?? 2
+    if (pa !== pb) return pa - pb
+    return (SORT_ORDER[a.normalized_position] || 99) - (SORT_ORDER[b.normalized_position] || 99)
+  })
+
+  // Assign players to lines in order, filling each to its target count
+  const defense = tagged.splice(0, targetDef)
+  const dm = tagged.splice(0, targetDm)
+  const midfield = tagged.splice(0, targetMid)
+  const attack = tagged.splice(0, targetAtt)
 
   return {
     formation,
     lines: {
       gk: [gk],
-      defense: sortedDefense,
-      midfield: sortedMidfield,
-      attack: sortedAttack,
+      defense: sortLine(defense),
+      dm: sortLine(dm),
+      midfield: sortLine(midfield),
+      attack: sortLine(attack),
     },
   }
 }
