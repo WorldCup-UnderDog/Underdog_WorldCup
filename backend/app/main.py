@@ -1,107 +1,87 @@
+"""FastAPI app entrypoint."""
+
 from __future__ import annotations
 
-import os
-from pathlib import Path
+import pandas as pd
+from typing import Literal
+import sys, os
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from app.schemas import MatchupRequest, MatchupResponse
-from app.services.data_loader import (
-    NAME_TO_CODE,
-    default_matchup_csv_path,
-    extract_supported_codes,
-    load_matchup_lookup,
+from .api.v1.router import api_router
+from .core.config import settings
+from .core.logging import configure_logging
+from .services.data_loader import load_matchup_dataset, load_player_records
+from .services.player_service import PlayerService
+from .services.predictor import PredictionService
+
+# ── Load player data ─────────────────────────────────────
+players_df = pd.read_csv(
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data/fc26_combined.csv")
 )
-from app.services.predictor import (
-    InvalidMatchupError,
-    MatchupNotFoundError,
-    MatchupPredictor,
-    UnknownTeamError,
-    UnsupportedTeamError,
+players_df = players_df[players_df["name"].notna() & players_df["overall_rating"].notna()]
+
+# ── Lifespan ─────────────────────────────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    configure_logging()
+    matchup_dataset = load_matchup_dataset()
+    player_records = load_player_records()
+    app.state.prediction_service = PredictionService(dataset=matchup_dataset)
+    app.state.player_service = PlayerService(players=player_records)
+    yield
+
+# ── App ───────────────────────────────────────────────────
+app = FastAPI(
+    title=settings.app_name,
+    debug=settings.debug,
+    lifespan=lifespan,
 )
 
-app = FastAPI(title="Dark Horse Matchup API", version="0.1.0")
-
-
-def _cors_allow_origins() -> list[str]:
-    configured = os.getenv("CORS_ALLOW_ORIGINS", "").strip()
-    if configured:
-        return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
-    return ["http://localhost:5173", "http://127.0.0.1:5173"]
-
-
-# Local-dev defaults allow localhost/127.0.0.1 on any port.
-# Use CORS_ALLOW_ORIGINS and/or CORS_ALLOW_ORIGIN_REGEX for deployed environments.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_cors_allow_origins(),
-    allow_origin_regex=os.getenv(
-        "CORS_ALLOW_ORIGIN_REGEX", r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-    ),
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class HealthResponse(BaseModel):
-    status: str
-    matchup_pairs: int
-    supported_teams: int
+app.include_router(api_router)
+app.include_router(api_router, prefix="/api/v1")
 
+# ── Player endpoints ──────────────────────────────────────
+@app.get("/players")
+def get_players(nation: str = None, position: str = None):
+    df = players_df.copy()
+    if nation:
+        df = df[df["nation"].str.lower().str.strip() == nation.lower().strip()]
+    if position:
+        df = df[df["best_position"].str.upper() == position.upper()]
+    df = df.sort_values("overall_rating", ascending=False)
+    return df[[
+        "name", "nation", "best_position", "age",
+        "overall_rating", "potential", "value",
+        "playstyles", "playstyles2", "playstyles3",
+        "acceleration", "sprint_speed", "dribbling", "finishing",
+        "short_passing", "long_passing",
+        "total_attacking", "total_skill", "total_movement",
+        "total_power", "total_mentality", "total_defending",
+        "total_goalkeeping", "reactions", "heading_accuracy",
+        "ball_control", "jumping"
+    ]].fillna(0).to_dict(orient="records")
 
-class TeamsResponse(BaseModel):
-    teams: list[str]
-
-
-def _resolve_matchup_csv_path() -> Path:
-    configured_path = os.getenv("MATCHUP_CSV_PATH", "").strip()
-    if not configured_path:
-        return default_matchup_csv_path()
-    path = Path(configured_path).expanduser()
-    if not path.is_absolute():
-        path = (Path(__file__).resolve().parents[1] / path).resolve()
-    return path
-
-
-def _build_predictor() -> MatchupPredictor:
-    csv_path = _resolve_matchup_csv_path()
-    lookup = load_matchup_lookup(csv_path)
-    supported_codes = extract_supported_codes(lookup)
-    return MatchupPredictor(
-        lookup=lookup,
-        name_to_code=NAME_TO_CODE,
-        supported_codes=supported_codes,
-    )
-
-
-predictor = _build_predictor()
-
-
-@app.get("/health", response_model=HealthResponse)
-def health() -> HealthResponse:
-    return HealthResponse(
-        status="ok",
-        matchup_pairs=predictor.matchup_count,
-        supported_teams=len(predictor.supported_team_names()),
-    )
-
-
-@app.get("/teams", response_model=TeamsResponse)
-def teams() -> TeamsResponse:
-    return TeamsResponse(teams=predictor.supported_team_names())
-
-
-@app.post("/predict-matchup", response_model=MatchupResponse)
-def predict_matchup(req: MatchupRequest) -> MatchupResponse:
-    try:
-        return predictor.predict(req)
-    except InvalidMatchupError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
-    except UnknownTeamError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
-    except UnsupportedTeamError as error:
-        raise HTTPException(status_code=422, detail=str(error)) from error
-    except MatchupNotFoundError as error:
-        raise HTTPException(status_code=404, detail=str(error)) from error
+@app.get("/player/{name}")
+def get_player(name: str):
+    row = players_df[players_df["name"].str.lower() == name.lower()]
+    if row.empty:
+        return {"error": "Player not found"}
+    return row.iloc[0].fillna(0).to_dict()

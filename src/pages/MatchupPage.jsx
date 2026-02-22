@@ -30,9 +30,9 @@ const FLAG_MAP = {
 const getFlag = (team) => FLAG_MAP[team] || '🏳️'
 
 function UpsetMeter({ score }) {
-  const pct = Math.min((score / 10) * 100, 100)
-  const color = score >= 7 ? '#e8c84a' : score >= 4 ? '#f0a500' : '#4a8fff'
-  const label = score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW'
+  const pct = Math.min(Math.max(score, 0), 100)
+  const color = score >= 70 ? '#e8c84a' : score >= 40 ? '#f0a500' : '#4a8fff'
+  const label = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'
   return (
     <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
@@ -41,7 +41,7 @@ function UpsetMeter({ score }) {
         </span>
         <span style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', lineHeight: 1, color }}>{score}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)' }}>/10</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--muted)' }}>/100</span>
         </span>
       </div>
       <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
@@ -321,19 +321,6 @@ function MatchupPage() {
 
         .nav-actions { display: flex; gap: 0.5rem; }
 
-        .btn-ghost {
-          background: var(--glass);
-          border: 1px solid var(--glass-border);
-          color: var(--muted);
-          padding: 0.45rem 1rem;
-          border-radius: 8px;
-          font-family: var(--font-body);
-          font-size: 0.82rem; font-weight: 500;
-          cursor: pointer; text-decoration: none;
-          transition: color 0.2s, border-color 0.2s;
-        }
-        .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
-
         .matchup-main {
           max-width: 900px; margin: 0 auto;
           padding: 3rem 2rem 5rem;
@@ -579,7 +566,7 @@ function MatchupPage() {
       <div className="matchup-page">
         {/* NAV */}
         <nav className="matchup-nav">
-          <a href={ROUTES.APP} className="matchup-logo">UNDER<span>DOG</span></a>
+          <a href={ROUTES.APP} className="matchup-logo">DARK<span>HORSE</span></a>
           <div className="nav-actions">
             <a href={ROUTES.APP} className="btn-ghost">← Back</a>
             <button type="button" className="btn-ghost" onClick={handleLogout}>Logout</button>

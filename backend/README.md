@@ -1,35 +1,23 @@
-# Backend (FastAPI)
+# FastAPI Backend
 
 ## Run locally
 
-```bash
-cd backend
-python -m venv .venv
-(or: python3 -m venv .venv)
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
+1. Create a Python virtual environment.
+2. Install dependencies:
+   - `pip install -r backend/requirements.txt`
+3. Start API:
+   - `uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000`
 
-Optional env var:
-
-- `MATCHUP_CSV_PATH` (override default `backend/data/nation_matchup_probabilities_proxy_logreg_ALL_pairs_calibrated.csv`)
-- `CORS_ALLOW_ORIGINS` (comma-separated exact origins, e.g. `https://app.example.com`)
-- `CORS_ALLOW_ORIGIN_REGEX` (regex fallback for allowed origins)
-
-## Endpoints
+## Available endpoints
 
 - `GET /health`
 - `GET /teams`
 - `POST /predict-matchup`
+- `POST /predict` (legacy alias)
+- `POST /upset`
+- `GET /players/{nation}`
+- `GET /players/top-upsets`
+- `GET /goalkeepers/wall-ranking`
 
-Example request body:
+Versioned aliases are also available under `/api/v1/*`.
 
-```json
-{
-  "team_a": "Germany",
-  "team_b": "Morocco",
-  "neutral_site": true,
-  "tournament_stage": "group"
-}
-```

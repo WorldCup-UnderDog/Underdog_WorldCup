@@ -5,7 +5,7 @@ function MatchupHeader({ onLogout }) {
     <>
       <nav className="matchup-nav">
         <a href={ROUTES.APP} className="matchup-logo">
-          UNDER<span>DOG</span>
+          DARK<span>HORSE</span>
         </a>
         <div className="nav-actions">
           <a href={ROUTES.APP} className="btn-ghost">

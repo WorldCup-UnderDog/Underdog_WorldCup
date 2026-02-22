@@ -1,2 +1,2 @@
-"""FastAPI application package for matchup prediction."""
+"""FastAPI application package."""
 

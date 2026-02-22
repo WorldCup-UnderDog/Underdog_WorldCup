@@ -1,2 +1,2 @@
-"""Services for model data loading and matchup inference."""
+"""Service layer."""
 

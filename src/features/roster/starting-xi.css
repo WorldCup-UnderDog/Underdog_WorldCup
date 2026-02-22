@@ -1,0 +1,342 @@
+.starting-xi {
+  margin-bottom: 1rem;
+}
+
+.starting-xi-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.starting-xi-formation-value {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.starting-xi-pitch {
+  position: relative;
+  background: linear-gradient(180deg, rgba(18, 59, 34, 0.82), rgba(10, 41, 24, 0.88));
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0.9rem;
+}
+
+.pitch-halfway-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.34);
+  z-index: 1;
+}
+
+.pitch-center-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  z-index: 1;
+}
+
+.pitch-penalty-box {
+  position: absolute;
+  left: 50%;
+  width: 44%;
+  height: 14%;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  z-index: 1;
+}
+
+.pitch-penalty-box-top {
+  top: 0;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.pitch-penalty-box-bottom {
+  bottom: 0;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.starting-xi-rows {
+  position: relative;
+  z-index: 2;
+  min-height: 460px;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.starting-xi-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.xi-player-card {
+  min-width: 82px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(5, 12, 24, 0.78);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.45rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.xi-player-card:hover,
+.xi-player-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(232, 200, 74, 0.55);
+  box-shadow: 0 8px 18px rgba(4, 8, 16, 0.45);
+  outline: none;
+}
+
+.xi-player-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.64rem;
+  color: var(--accent);
+}
+
+.xi-player-name {
+  margin-top: 0.2rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.xi-player-position {
+  margin-top: 0.2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.xi-player-stats {
+  margin-top: 0.24rem;
+  font-size: 0.62rem;
+  color: rgba(232, 237, 245, 0.8);
+  line-height: 1.1;
+}
+
+.starting-xi-compact .starting-xi-rows {
+  min-height: 360px;
+}
+
+.starting-xi-compact .xi-player-card {
+  min-width: 70px;
+  padding: 0.34rem 0.42rem;
+}
+
+.starting-xi-compact .xi-player-name {
+  font-size: 0.68rem;
+}
+
+@media (max-width: 780px) {
+  .starting-xi-pitch {
+    padding: 0.7rem;
+  }
+
+  .starting-xi-rows {
+    min-height: 380px;
+    gap: 0.4rem;
+  }
+
+  .xi-player-card {
+    min-width: 74px;
+    padding: 0.35rem 0.4rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .starting-xi-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .starting-xi-rows {
+    min-height: 340px;
+  }
+
+  .xi-player-card {
+    min-width: 68px;
+  }
+
+  .xi-player-name {
+    font-size: 0.66rem;
+  }
+
+  .xi-player-position,
+  .xi-player-stats {
+    font-size: 0.58rem;
+  }
+}
+
+/* ── Discussion ─────────────────────────────────────────── */
+
+.discussion-section {
+  margin-top: 2rem;
+}
+
+.discussion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.discussion-textarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.discussion-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.discussion-char-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.discussion-login-prompt {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.discussion-empty {
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.discussion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.discussion-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.discussion-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.discussion-username {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.discussion-time {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-right: auto;
+}
+
+.discussion-delete-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.discussion-delete-btn:hover {
+  color: #e05555;
+  background: rgba(224, 85, 85, 0.12);
+}
+
+.discussion-content {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+}
+
+.discussion-votes {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.discussion-vote-btn {
+  background: none;
+  border: 1px solid var(--glass-border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.discussion-vote-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.discussion-vote-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.discussion-vote-btn.active-up {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(232, 200, 74, 0.1);
+}
+
+.discussion-vote-btn.active-down {
+  color: #e05555;
+  border-color: #e05555;
+  background: rgba(224, 85, 85, 0.1);
+}

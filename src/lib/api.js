@@ -17,3 +17,33 @@ export async function fetchUpsetScore(teamA, teamB, scoreA, scoreB) {
   });
   return res.json();
 }
+
+
+export async function fetchPlayersByNation(nation) {
+  const res = await fetch(`${BASE_URL}/players/${nation}`);
+  return res.json();
+}
+
+export async function fetchTopUpsetPlayers() {
+  const res = await fetch(`${BASE_URL}/players/top-upsets`);
+  return res.json();
+}
+
+export async function fetchGKWallRanking() {
+  const res = await fetch(`${BASE_URL}/goalkeepers/wall-ranking`);
+  return res.json();
+}
+
+
+export async function fetchPlayers(nation = null, position = null) {
+  const params = new URLSearchParams();
+  if (nation) params.append("nation", nation);
+  if (position) params.append("position", position);
+  const res = await fetch(`${BASE_URL}/players?${params}`);
+  return res.json();
+}
+
+export async function fetchPlayer(name) {
+  const res = await fetch(`${BASE_URL}/player/${encodeURIComponent(name)}`);
+  return res.json();
+}

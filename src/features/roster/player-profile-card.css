@@ -1,0 +1,255 @@
+/* ── Overlay ──────────────────────────────────────────────────────────────── */
+.ppc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 16, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.ppc-card {
+  background: var(--navy, #0a1628);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 740px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* ── Close button ─────────────────────────────────────────────────────────── */
+.ppc-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: none;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 6px;
+  color: var(--muted, #7a8ba0);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.3rem 0.55rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ppc-close:hover {
+  color: var(--text, #e8edf5);
+  border-color: var(--accent, #e8c84a);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.ppc-header {
+  margin-bottom: 1.5rem;
+  padding-right: 2.5rem;
+}
+.ppc-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.2rem;
+  color: var(--text, #e8edf5);
+  line-height: 1.1;
+}
+.ppc-gk-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  background: var(--accent, #e8c84a);
+  color: #040810;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-left: 0.6rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+.ppc-meta {
+  color: var(--muted, #7a8ba0);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* ── Ratings grid ─────────────────────────────────────────────────────────── */
+.ppc-ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+.ppc-rating-item {
+  background: var(--glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  padding: 0.8rem 0.4rem;
+  text-align: center;
+}
+.ppc-rating-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted, #7a8ba0);
+  margin-bottom: 0.3rem;
+}
+.ppc-rating-value {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.55rem;
+  letter-spacing: 0.03em;
+  color: var(--text, #e8edf5);
+  line-height: 1;
+}
+.ppc-rating-positive {
+  color: #4aff9f;
+}
+.ppc-rating-small {
+  font-size: 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ── Section ──────────────────────────────────────────────────────────────── */
+.ppc-section {
+  margin-bottom: 1.5rem;
+}
+.ppc-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted, #7a8ba0);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+
+/* ── Playstyles ───────────────────────────────────────────────────────────── */
+.ppc-playstyles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.ppc-playstyle-chip {
+  background: var(--glass, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: 20px;
+  padding: 0.2rem 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text, #e8edf5);
+}
+
+/* ── Two-column layout ────────────────────────────────────────────────────── */
+.ppc-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ── Stat bars ────────────────────────────────────────────────────────────── */
+.ppc-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.ppc-stat-label {
+  flex: 0 0 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted, #7a8ba0);
+  white-space: nowrap;
+}
+.ppc-stat-bar-wrap {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ppc-stat-bar-fill {
+  height: 100%;
+  background: var(--accent, #e8c84a);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.ppc-stat-value {
+  flex: 0 0 26px;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text, #e8edf5);
+}
+
+/* ── Hexagon radar ────────────────────────────────────────────────────────── */
+.ppc-radar-svg {
+  width: 100%;
+  max-width: 280px;
+  display: block;
+  margin: 0 auto;
+}
+.ppc-radar-grid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+.ppc-radar-axis {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+.ppc-radar-data {
+  fill: rgba(232, 200, 74, 0.18);
+  stroke: var(--accent, #e8c84a);
+  stroke-width: 2;
+}
+.ppc-radar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  fill: var(--muted, #7a8ba0);
+}
+
+/* ── Table name button ────────────────────────────────────────────────────── */
+.ppc-name-btn {
+  background: none;
+  border: none;
+  color: var(--text, #e8edf5);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.ppc-name-btn:hover {
+  color: var(--accent, #e8c84a);
+  text-decoration-color: var(--accent, #e8c84a);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ppc-card {
+    padding: 1.25rem;
+  }
+  .ppc-ratings-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ppc-columns {
+    grid-template-columns: 1fr;
+  }
+}
