@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseClient } from '../lib/supabase'
+import { fetchProfile } from '../lib/profile'
 import { ROUTES } from '../routes'
 import { getFlagSrc } from '../features/roster/flags'
 import { fetchTeamRoster } from '../features/roster/api'
 import StartingXIFormation from '../features/roster/components/StartingXIFormation'
+import TeamDiscussion from '../features/roster/components/TeamDiscussion'
 
 function TeamRosterDetailPage({ teamName }) {
   const [email, setEmail] = useState('')
+  const [userId, setUserId] = useState(null)
+  const [username, setUsername] = useState('')
   const [loadingSession, setLoadingSession] = useState(true)
   const [sessionError, setSessionError] = useState('')
 
@@ -33,7 +37,12 @@ function TeamRosterDetailPage({ teamName }) {
           window.location.href = ROUTES.LOGIN
           return
         }
-        if (mounted) setEmail(session.user.email || '')
+        if (mounted) {
+          setEmail(session.user.email || '')
+          setUserId(session.user.id)
+          const profile = await fetchProfile(session.user.id).catch(() => null)
+          setUsername(profile?.username || session.user.user_metadata?.full_name || session.user.email || '')
+        }
       } catch (err) {
         if (mounted) setSessionError(err.message || 'Failed to load session')
       } finally {
@@ -192,6 +201,8 @@ function TeamRosterDetailPage({ teamName }) {
                       </tbody>
                     </table>
                   </div>
+
+                  <TeamDiscussion teamName={teamName} userId={userId} username={username} />
                 </div>
               )}
             </>
