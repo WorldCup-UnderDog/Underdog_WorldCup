@@ -45,6 +45,34 @@ Backend env example:
 
 - `backend/.env.example`
 
+## Deploy (Vercel + Render)
+
+### Frontend (Vercel)
+
+1. Import this repo in Vercel.
+2. Set environment variables in Vercel project settings:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_API_BASE_URL=https://<your-render-service>.onrender.com`
+3. Deploy from `main`.
+
+Notes:
+- `vercel.json` includes SPA rewrites so deep links like `/app/matchup` work.
+
+### Backend (Render)
+
+1. Create a new Web Service from this repo on Render.
+2. Render can read `render.yaml` for:
+   - `buildCommand: pip install -r backend/requirements.txt`
+   - `startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
+3. Set environment variables:
+   - `APP_ENV=production`
+   - `DEBUG=false`
+   - `CORS_ORIGINS=https://<your-vercel-domain>`
+
+Notes:
+- Backend CORS is environment-driven via `CORS_ORIGINS`.
+
 ## Backend Endpoints
 
 - `GET /health`

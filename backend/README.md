@@ -21,3 +21,16 @@
 
 Versioned aliases are also available under `/api/v1/*`.
 
+## Deploy on Render
+
+This repo includes `render.yaml` with service settings:
+
+- Build: `pip install -r backend/requirements.txt`
+- Start: `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
+- Health check: `/health`
+
+Set these environment variables in Render:
+
+- `APP_ENV=production`
+- `DEBUG=false`
+- `CORS_ORIGINS=https://<your-vercel-domain>`

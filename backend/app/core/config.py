@@ -17,7 +17,10 @@ class Settings:
     app_env: str = os.getenv("APP_ENV", "development")
     app_host: str = os.getenv("APP_HOST", "0.0.0.0")
     app_port: int = int(os.getenv("APP_PORT", "8000"))
-    cors_origins_raw: str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    cors_origins_raw: str = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174",
+    )
     debug: bool = os.getenv("DEBUG", "false").lower() == "true"
 
     @property
@@ -26,4 +29,3 @@ class Settings:
 
 
 settings = Settings()
-
