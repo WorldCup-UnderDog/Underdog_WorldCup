@@ -20,12 +20,15 @@ from xgboost import XGBClassifier
 # =========================
 # CONFIG (defaults)
 # =========================
-MATCHES_ALL_PATH = "/Users/jonathan/Desktop/Underdog/Underdog_WorldCup/backend/app/services/Cleaned_Data/matches (1).csv"
-GOALS_ALL_PATH = "/Users/jonathan/Desktop/Underdog/Underdog_WorldCup/backend/app/services/Cleaned_Data/goals.csv"
-TOP10_FC_PATH = "/Users/jonathan/Desktop/Underdog/Underdog_WorldCup/backend/app/services/Cleaned_Data/top10_with_fc26_merged.csv"
-TEAMS_ELO_PATH = "/Users/jonathan/Desktop/Underdog/Underdog_WorldCup/backend/app/services/Cleaned_Data/teams_elo.csv"
+_HERE = Path(__file__).parent
+_DATA = _HERE / "Cleaned_Data"
 
-OUT_DIR = "artifacts/"
+MATCHES_ALL_PATH = str(_DATA / "matches (1).csv")
+GOALS_ALL_PATH = str(_DATA / "goals.csv")
+TOP10_FC_PATH = str(_DATA / "top10_with_fc26_merged.csv")
+TEAMS_ELO_PATH = str(_DATA / "teams_elo.csv")
+
+OUT_DIR = str(_HERE / "artifacts")
 
 ALERT_THRESHOLD = 0.60
 
