@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   APP: '/app',
+  PROFILE: '/app/profile',
   MATCHUP: '/app/matchup',
   ROSTERS: '/app/rosters',
 }
