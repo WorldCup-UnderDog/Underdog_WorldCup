@@ -36,3 +36,7 @@ __pycache__/
 .coverage
 htmlcov/
 .ipynb_checkpoints/
+.venv/
+venv/
+backend/.venv/
+backend/venv/
