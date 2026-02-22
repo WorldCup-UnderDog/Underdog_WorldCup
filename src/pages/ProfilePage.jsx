@@ -147,7 +147,7 @@ function ProfilePage() {
     <div className="template-page">
       <div className="template-topbar dashboard-topbar">
         <a href={ROUTES.HOME} className="logo">
-          UNDER<span>DOG</span>
+          DARK<span>HORSE</span>
         </a>
         <div className="topbar-actions">
           <a className="btn-ghost" href={ROUTES.APP}>← Back</a>

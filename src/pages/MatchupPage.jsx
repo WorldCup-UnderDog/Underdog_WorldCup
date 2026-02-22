@@ -566,7 +566,7 @@ function MatchupPage() {
       <div className="matchup-page">
         {/* NAV */}
         <nav className="matchup-nav">
-          <a href={ROUTES.APP} className="matchup-logo">UNDER<span>DOG</span></a>
+          <a href={ROUTES.APP} className="matchup-logo">DARK<span>HORSE</span></a>
           <div className="nav-actions">
             <a href={ROUTES.APP} className="btn-ghost">← Back</a>
             <button type="button" className="btn-ghost" onClick={handleLogout}>Logout</button>

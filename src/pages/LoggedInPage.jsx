@@ -153,7 +153,7 @@ export default function Dashboard() {
       <header className="template-topbar dashboard-topbar dashboard-redesign-topbar">
         <div className="template-container dashboard-redesign-topbar-inner">
           <a href={ROUTES.HOME} className="logo">
-            UNDER<span>DOG</span>
+            DARK<span>HORSE</span>
           </a>
           <button
             type="button"

@@ -69,7 +69,7 @@ function AuthPage({ mode }) {
     <div className="template-page">
       <div className="template-topbar">
         <a href={ROUTES.HOME} className="logo">
-          UNDER<span>DOG</span>
+          DARK<span>HORSE</span>
         </a>
       </div>
 
